@@ -8,4 +8,6 @@ javac Hermes/Transforms/AlloyTransform.java
 javac Hermes/Transforms/ElectronicsTransform.java
 
 javac Hermes/Country.java
+
+javac TestRunner.java
 ##javac -Xlint:deprecation TestRunner.java
