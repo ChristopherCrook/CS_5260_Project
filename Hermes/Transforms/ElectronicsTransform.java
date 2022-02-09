@@ -10,7 +10,7 @@ public class ElectronicsTransform {
   }
   
   //! Method to perform a transformation
-  public boolean Tranform(
+  public boolean Transform(
     Resource population,          // inout 1
     Resource metallicElems,       // in    3
     Resource metallicAlloys,      // in    2

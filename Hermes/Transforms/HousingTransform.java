@@ -10,7 +10,7 @@ public class HousingTransform {
   }
   
   //! Method to perform a transformation
-  public boolean Tranform(
+  public boolean Transform(
     Resource population,     // inout 5
     Resource metallicElems,  // in    1
     Resource timber,         // in    5

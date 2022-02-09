@@ -10,7 +10,7 @@ public class AlloyTransform {
   }
   
   //! Method to perform a transformation
-  public boolean Tranform(
+  public boolean Transform(
     Resource population,          // inout 1
     Resource metallicElems,       // in    2
     Resource metallicAlloys,      // out   1

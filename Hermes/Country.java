@@ -83,6 +83,8 @@ public class Country implements Runnable, Scheduler {
         frontier_max_size < 1)
         return;
         
+    name_m = name;
+    
     String line = new String();
     String splitBy = new String(",");
     
@@ -90,6 +92,7 @@ public class Country implements Runnable, Scheduler {
     try
     {
       BufferedReader resource_reader = new BufferedReader(new FileReader(resource_filename));
+      boolean found = false;
     
       while ((line = resource_reader.readLine()) != null)
       {
@@ -105,10 +108,11 @@ public class Country implements Runnable, Scheduler {
           electronics_m.set(new Resource(ELECTRONICS, Long.parseLong(newLine[6])));
           housing_m.set(new Resource(HOUSING, Long.parseLong(newLine[7])));
           housingWaste_m.set(new Resource(HOUSINGWASTE, Long.parseLong(newLine[8])));
-        
+
+          found = true;
           break;
-        }
-      }
+        } // end if
+      } // end while
     }
     catch (IOException e)
     {
