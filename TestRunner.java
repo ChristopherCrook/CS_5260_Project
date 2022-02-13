@@ -82,7 +82,9 @@ public class TestRunner {
       1
     );
     
-    narnia.printDetails();
+    //narnia.printDetails();
+    //boolean check = narnia.CalculateStatus();
+    //narnia.printStatus();
     
     System.out.println("/---- End Country Test ----/");
     

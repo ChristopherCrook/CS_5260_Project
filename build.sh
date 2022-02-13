@@ -2,6 +2,7 @@
 
 javac Hermes/Scheduler.java
 javac Hermes/Resources/Resource.java
+javac Hermes/Resources/Status.java
 
 javac Hermes/Transforms/HousingTransform.java
 javac Hermes/Transforms/AlloyTransform.java
