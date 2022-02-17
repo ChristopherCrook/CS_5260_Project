@@ -76,6 +76,12 @@ public class Country implements Runnable, Scheduler {
     configured_m = false;
   }
   
+  //! Method to get country name
+  public String GetName()
+  {
+    return name_m;
+  }
+  
   //! Inherited schedule method from Scheduler
   public void schedule(
     String name,

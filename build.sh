@@ -10,5 +10,7 @@ javac Hermes/Transforms/ElectronicsTransform.java
 
 javac Hermes/Country.java
 
+javac Hermes/Trade/Entry.java
+
 javac TestRunner.java
 ##javac -Xlint:deprecation TestRunner.java

@@ -2,6 +2,7 @@ import java.util.*;
 import Hermes.Resources.Resource;
 import Hermes.Transforms.*;
 import Hermes.Country;
+import Hermes.Trade.*;
 
 //! Class to test Hermes classes
 public class TestRunner {
@@ -90,6 +91,56 @@ public class TestRunner {
     
     return true;
   }
+  
+  //! Test the Trade Entry class
+  public static boolean TestEntry()
+  {
+    System.out.println("/--- Begin Entry Test ---/");
+    Country narnia = new Country();
+    
+    String test = new String("test");
+    String file = new String("countries.csv");
+    String name = new String("Picon");
+    
+    narnia.schedule(
+      name,
+      file,
+      test,
+      test,
+      1,
+      1,
+      1
+    );
+    
+    Resource rsrc = new Resource(new String("substance"), 1000);
+    Entry entry = new Entry(narnia, rsrc);
+    
+    if (!(entry.GetName().equals("Picon")))
+      return false;
+      
+    if (!(entry.GetCountry().get().equals(narnia)))
+      return false;
+      
+    if (!(entry.GetResource().GetName().equals("substance")))
+      return false;
+      
+    if (entry.GetResource().GetAmount() != 1000)
+      return false;
+      
+    if (entry.GetResult() != false)
+      return false;
+      
+    boolean setResult = entry.SetResultToTrue();
+    
+    if (setResult != true)
+      return false;
+      
+    if(entry.GetResult() != true)
+      return false;
+    
+    System.out.println("/---- End Entry Test ----/");
+    return true;
+  }
 
   //! Program Execution point
   public static void main(String[] args)
@@ -102,5 +153,8 @@ public class TestRunner {
       
     if (!(TestCountry()))
       System.out.println("Country Test Failed");
+      
+    if(!(TestEntry()))
+      System.out.println("Entry Test Failed");
   }
 }
