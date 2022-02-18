@@ -112,8 +112,9 @@ public class TestRunner {
       1
     );
     
-    Resource rsrc = new Resource(new String("substance"), 1000);
-    Entry entry = new Entry(narnia, rsrc);
+    Resource need = new Resource(new String("substance1"), 1000);
+    Resource offer = new Resource(new String("substance2"), 2000);
+    Entry entry = new Entry(narnia, offer, need, false);
     
     if (!(entry.GetName().equals("Picon")))
       return false;
@@ -121,21 +122,33 @@ public class TestRunner {
     if (!(entry.GetCountry().get().equals(narnia)))
       return false;
       
-    if (!(entry.GetResource().GetName().equals("substance")))
+    if (!(entry.GetNeed().GetName().equals("substance1")))
       return false;
       
-    if (entry.GetResource().GetAmount() != 1000)
+    if (!(entry.GetOffer().GetName().equals("substance2")))
       return false;
       
-    if (entry.GetResult() != false)
+    if (entry.GetNeed().GetAmount() != 1000)
       return false;
       
-    boolean setResult = entry.SetResultToTrue();
+    if (entry.GetOffer().GetAmount() != 2000)
+      return false;
+      
+    if (entry.GetSuccess() != false)
+      return false;
+      
+    if (entry.GetNoMatch() != false)
+      return false;
+      
+    boolean setResult = entry.SetSuccessToTrue();
     
     if (setResult != true)
       return false;
       
-    if(entry.GetResult() != true)
+    if(entry.GetSuccess() != true)
+      return false;
+      
+    if(entry.IsSurplus() != false)
       return false;
     
     System.out.println("/---- End Entry Test ----/");

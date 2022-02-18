@@ -3,7 +3,9 @@ package Hermes;
 import Hermes.Resources.Resource;
 import Hermes.Resources.Status;
 import Hermes.Transforms.*;
+import Hermes.Trade.*;
 
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import java.util.*; 
 import java.io.*; 
@@ -21,6 +23,9 @@ public class Country implements Runnable, Scheduler {
   static final String ELECTRONICS = new String("electronics");
   static final String HOUSING = new String("housing");
   static final String HOUSINGWASTE = new String("housing waste");
+  
+  //! Variable for the Queue
+  private ArrayBlockingQueue<Entry> queue_m;
 
   //! Variable for the name of the country
   private String name_m = new String();
@@ -74,6 +79,12 @@ public class Country implements Runnable, Scheduler {
     
     // Set configured to false
     configured_m = false;
+  }
+  
+  //! Method to set the blocking queue
+  public void SetQueue(ArrayBlockingQueue<Entry> queue)
+  {
+    queue_m = queue;
   }
   
   //! Method to get country name
