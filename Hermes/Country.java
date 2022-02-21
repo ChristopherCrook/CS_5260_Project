@@ -172,7 +172,7 @@ public class Country implements Runnable, Scheduler {
   
   //! Method to calculate the current state, which is very complicated
   //! XXX TO-DO make this simpler somehow
-  public boolean CalculateStatus()
+  protected boolean CalculateStatus()
   {
     // List of statuses
     ArrayList<Boolean> temp_status = new ArrayList<>(Arrays.asList(

@@ -22,6 +22,9 @@ public class Entry {
   
   private AtomicBoolean is_surplus_m;
   
+  private AtomicLong taken_amount;
+  private AtomicLong given_amount;
+  
   //! Constructor
   public Entry(Country country, Resource offer, Resource need, boolean is_surplus)
   {
@@ -89,5 +92,37 @@ public class Entry {
   public boolean GetNoMatch()
   {
     return no_match_m.get();
+  }
+  
+  //! Method to set how much was given
+  public void SetGiven(long given)
+  {
+    if (given_amount == null)
+      given_amount = new AtomicLong(Long.valueOf(given));
+  }
+  
+  //! Method to set how much was taken
+  public void SetTaken(long taken)
+  {
+    if (taken_amount == null)
+      taken_amount = new AtomicLong(Long.valueOf(taken));
+  }
+  
+  //! Method to get the given amount
+  public long GetGiven()
+  {
+    if (given_amount == null)
+      return -1;
+    else
+      return given_amount.longValue();
+  }
+  
+  //! Method to get the taken amount
+  public long GetTaken()
+  {
+    if (taken_amount == null)
+      return -1;
+    else
+      return taken_amount.longValue();
   }
 }
