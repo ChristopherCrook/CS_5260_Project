@@ -6,6 +6,7 @@ import Hermes.Resources.Resource;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import java.util.*;
+import java.lang.Math.*;
 
 //! Class declaration for the Trade Manager
 public class Manager implements Runnable {
@@ -32,7 +33,18 @@ public class Manager implements Runnable {
     {
       // Check that the queue isn't empty
       if (queue_m.isEmpty())
-        continue;
+      {
+        try { // try to sleep the thread
+          Thread.sleep(100);
+        }
+        catch (InterruptedException ie) {
+         // do nothing
+        }
+        finally
+        {
+          continue;
+        }
+      } // end if isEmpty()
         
       Entry current;
       
@@ -95,6 +107,8 @@ public class Manager implements Runnable {
       
       if (success == true && bestOffer != null)
       {
+        boolean check = current.SetSuccessToTrue();
+        check = bestOffer.SetSuccessToTrue();
         queue_m.remove(current);
         queue_m.remove(bestOffer);
         
@@ -103,9 +117,46 @@ public class Manager implements Runnable {
       
       // If we get here, we don't have a perfect match. We need to 
       // See if a trade is still possible.
+      long current_need = current.GetNeed().GetAmount();
+      long current_offer = current.GetOffer().GetAmount();
       
+      long bestOffer_need = bestOffer.GetNeed().GetAmount();
+      long bestOffer_offer = bestOffer.GetOffer().GetAmount();
       
-      
+      // We know that the offer is less than the need
+      if (bestOffer.GetNeed().GetAmount() < current.GetOffer().GetAmount())
+      {
+        bestOffer.SetTaken(bestOffer.GetOffer().GetAmount());
+        current.SetGiven(bestOffer.GetOffer().GetAmount());
+              
+        bestOffer.SetGiven(current.GetOffer().GetAmount());
+        current.SetTaken(current.GetOffer().GetAmount());
+        
+        boolean ifcheck = current.SetSuccessToTrue();
+        ifcheck = bestOffer.SetSuccessToTrue();
+        queue_m.remove(current);
+        queue_m.remove(bestOffer);
+      }
+      else
+      {
+        double multiplier = (double) bestOffer.GetNeed().GetAmount()/
+                            (double) bestOffer.GetOffer().GetAmount();
+                            
+        long final_offer = (long)Math.floor(
+          (double)current.GetOffer().GetAmount() / multiplier
+        );
+        
+        bestOffer.SetTaken(current.GetOffer().GetAmount());
+        current.SetGiven(current.GetOffer().GetAmount());
+        
+        bestOffer.SetGiven(final_offer);
+        current.SetTaken(final_offer);
+        
+        boolean elsecheck = current.SetSuccessToTrue();
+        elsecheck = bestOffer.SetSuccessToTrue();
+        queue_m.remove(current);
+        queue_m.remove(bestOffer);
+      } // else          
     } // end while
   } // end run()
 }
