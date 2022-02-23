@@ -4,6 +4,8 @@ import Hermes.Transforms.*;
 import Hermes.Country;
 import Hermes.Trade.*;
 
+import java.util.concurrent.*;
+
 //! Class to test Hermes classes
 public class TestRunner {
 
@@ -154,6 +156,108 @@ public class TestRunner {
     System.out.println("/---- End Entry Test ----/");
     return true;
   }
+  
+  //! Test the Trade Manager
+  public static boolean TestManager1()
+  {
+    System.out.println("/--- Begin Manager Test ---/");
+    Country Picon = new Country();
+    Country Caprica = new Country();
+    Country Gemenon = new Country();
+    Country Aquaria = new Country();
+    
+    String test = new String("test");
+    String file = new String("countries.csv");
+    String picon_name = new String("Picon");
+    String caprica_name = new String("Caprica");
+    String gemenon_name = new String("Gemenon");
+    String aquaria_name = new String("Aquaria");
+    
+    Picon.schedule(picon_name, file, test, test, 1, 1, 1);
+    Caprica.schedule(caprica_name, file, test, test, 1, 1, 1);
+    Gemenon.schedule(gemenon_name, file, test, test, 1, 1, 1);
+    Aquaria.schedule(aquaria_name, file, test, test, 1, 1, 1);
+    
+    ArrayBlockingQueue<Entry> queue = new ArrayBlockingQueue<>(10);
+    Manager manager = new Manager();
+    Manager.SetQueue(queue);
+    
+    Resource s1 = new Resource(new String("substance1"), 1000);
+    Resource s2 = new Resource(new String("substance2"), 2000);
+    
+    Resource s3 = new Resource(new String("substance1"), 900);
+    Resource s4 = new Resource(new String("substance2"), 3000);
+    
+    Resource s5 = new Resource(new String("substance1"), 2000);
+    Resource s6 = new Resource(new String("substance2"), 400);
+    
+    Entry eTest = new Entry(Picon, s2, s1, false);
+    Entry e2    = new Entry(Caprica, s1, s2, false);
+    Entry e3    = new Entry(Gemenon, s3, s4, false);
+    Entry e4    = new Entry(Aquaria, s5, s6, true);
+    
+    Thread newThread = new Thread(manager);
+    
+    boolean checker = false;
+    queue.add(eTest);
+    queue.add(e2);
+    queue.add(e3);
+    queue.add(e4);
+    
+    newThread.start();
+    
+    while (eTest.GetNoMatch() == false && eTest.GetSuccess() == false)
+    {
+      try {
+        Thread.sleep(1000);
+      }
+      catch (InterruptedException ie) {
+        System.out.println("Thread interrupted");
+      } // end catch
+    } // end while
+    
+    try {
+      manager.Shutdown();
+      newThread.join();
+    }
+    catch (InterruptedException ie) {
+      System.out.println("Thread interrupted");
+    }
+    
+    if (eTest.GetNoMatch() != false)
+      return false;
+      
+    if (eTest.GetSuccess() != true)
+      return false;
+      
+    if (e2.GetNoMatch() != false)
+      return false;
+      
+    if (e2.GetSuccess() != true)
+      return false;
+      
+    if (e3.GetSuccess() != false && e3.GetNoMatch() != false)
+      return false;
+      
+    if (e4.GetSuccess() != false && e4.GetNoMatch() != false)
+      return false;
+      
+    if (queue.contains(eTest))
+      return false;
+      
+    if (queue.contains(e2))
+      return false;
+      
+    if (queue.contains(e3))
+      return false;
+      
+    if (queue.contains(e4) != true)
+      return false;
+      
+    System.out.println("/---- End Manager Test ----/");
+    
+    return true;
+  }
 
   //! Program Execution point
   public static void main(String[] args)
@@ -167,7 +271,10 @@ public class TestRunner {
     if (!(TestCountry()))
       System.out.println("Country Test Failed");
       
-    if(!(TestEntry()))
+    if (!(TestEntry()))
       System.out.println("Entry Test Failed");
+      
+    if (!(TestManager1()))
+      System.out.println("Manager Test 1 Failed");
   }
 }
