@@ -157,10 +157,10 @@ public class TestRunner {
     return true;
   }
   
-  //! Test the Trade Manager
+  //! Test the Trade Manager given a perfect match
   public static boolean TestManager1()
   {
-    System.out.println("/--- Begin Manager Test ---/");
+    System.out.println("/--- Begin Manager Test 1 ---/");
     Country Picon = new Country();
     Country Caprica = new Country();
     Country Gemenon = new Country();
@@ -254,7 +254,240 @@ public class TestRunner {
     if (queue.contains(e4) != true)
       return false;
       
-    System.out.println("/---- End Manager Test ----/");
+    if (eTest.GetTaken() != 2000)
+      return false;
+      
+    if (eTest.GetGiven() != 1000)
+      return false;
+      
+    if (e2.GetTaken() != 1000)
+      return false;
+      
+    if (e2.GetGiven() != 2000)
+      return false;
+      
+    //System.out.println("taken is " + eTest.GetTaken());
+    //System.out.println("given is " + eTest.GetGiven());
+    
+    System.out.println("/---- End Manager Test 1 ----/");
+    
+    return true;
+  }
+  
+    //! Test the Trade Manager given an offer and need that are both less
+  public static boolean TestManager2()
+  {
+    System.out.println("/--- Begin Manager Test 2 ---/");
+    Country Picon = new Country();
+    Country Gemenon = new Country();
+    Country Aquaria = new Country();
+    
+    String test = new String("test");
+    String file = new String("countries.csv");
+    String picon_name = new String("Picon");
+    String gemenon_name = new String("Gemenon");
+    String aquaria_name = new String("Aquaria");
+    
+    Picon.schedule(picon_name, file, test, test, 1, 1, 1);
+    Gemenon.schedule(gemenon_name, file, test, test, 1, 1, 1);
+    Aquaria.schedule(aquaria_name, file, test, test, 1, 1, 1);
+    
+    ArrayBlockingQueue<Entry> queue = new ArrayBlockingQueue<>(10);
+    Manager manager = new Manager();
+    Manager.SetQueue(queue);
+    
+    Resource s1 = new Resource(new String("substance1"), 1000);
+    Resource s2 = new Resource(new String("substance2"), 2000);
+    
+    Resource s3 = new Resource(new String("substance1"), 500);
+    Resource s4 = new Resource(new String("substance2"), 700);
+    
+    Resource s5 = new Resource(new String("substance1"), 900);
+    Resource s6 = new Resource(new String("substance2"), 950);
+    
+    Entry eTest = new Entry(Picon, s2, s1, false);
+    Entry e2    = new Entry(Gemenon, s3, s4, false);
+    
+    // This is our success entry
+    Entry e3    = new Entry(Aquaria, s5, s6, true);
+    
+    Thread newThread = new Thread(manager);
+    
+    boolean checker = false;
+    queue.add(eTest);
+    queue.add(e2);
+    queue.add(e3);
+    
+    newThread.start();
+    
+    while (eTest.GetNoMatch() == false && eTest.GetSuccess() == false)
+    {
+      try {
+        Thread.sleep(1000);
+      }
+      catch (InterruptedException ie) {
+        System.out.println("Thread interrupted");
+      } // end catch
+    } // end while
+    
+    try {
+      manager.Shutdown();
+      newThread.join();
+    }
+    catch (InterruptedException ie) {
+      System.out.println("Thread interrupted");
+    }
+    
+    if (eTest.GetNoMatch() != false)
+      return false;
+      
+    if (eTest.GetSuccess() != true)
+      return false;
+      
+    if (e3.GetNoMatch() != false)
+      return false;
+      
+    if (e3.GetSuccess() != true)
+      return false;
+      
+    if (e2.GetSuccess() != false)
+      return false;
+      
+    if (e2.GetNoMatch() != true)
+      return false;
+      
+    if (queue.contains(eTest))
+      return false;
+      
+    if (queue.contains(e3))
+      return false;
+      
+    // This should pass because it is not a surplus. Therefore, the manager
+    // should try to find a match and fail.  
+    if (queue.contains(e2))
+      return false;
+      
+      
+    if (eTest.GetTaken() != 950)
+      return false;
+      
+    if (eTest.GetGiven() != 900)
+      return false;
+      
+    if (e3.GetTaken() != 900)
+      return false;
+      
+    if (e3.GetGiven() != 950)
+      return false;
+    
+    System.out.println("/---- End Manager Test 2 ----/");
+    
+    return true;
+  }
+  
+  //! Test the trade Manager given trade country need that's higher than what
+  //! we can give
+    public static boolean TestManager3()
+  {
+    System.out.println("/--- Begin Manager Test 3 ---/");
+    Country Picon = new Country();
+    Country Gemenon = new Country();
+    Country Aquaria = new Country();
+    
+    String test = new String("test");
+    String file = new String("countries.csv");
+    String picon_name = new String("Picon");
+    String gemenon_name = new String("Gemenon");
+    String aquaria_name = new String("Aquaria");
+    
+    Picon.schedule(picon_name, file, test, test, 1, 1, 1);
+    Gemenon.schedule(gemenon_name, file, test, test, 1, 1, 1);
+    Aquaria.schedule(aquaria_name, file, test, test, 1, 1, 1);
+    
+    ArrayBlockingQueue<Entry> queue = new ArrayBlockingQueue<>(10);
+    Manager manager = new Manager();
+    Manager.SetQueue(queue);
+    
+    Resource s1 = new Resource(new String("substance1"), 1000);
+    Resource s2 = new Resource(new String("substance2"), 2000);
+    
+    Resource s3 = new Resource(new String("substance1"), 900);
+    Resource s4 = new Resource(new String("substance2"), 3000);
+    
+    Resource s5 = new Resource(new String("substance1"), 500);
+    Resource s6 = new Resource(new String("substance2"), 400);
+    
+    Entry eTest = new Entry(Picon, s2, s1, false);
+    
+    // This is our success entry
+    Entry e2    = new Entry(Gemenon, s3, s4, false);
+    
+    Entry e3    = new Entry(Aquaria, s5, s6, true);
+    
+    Thread newThread = new Thread(manager);
+    
+    boolean checker = false;
+    queue.add(eTest);
+    queue.add(e2);
+    queue.add(e3);
+    
+    newThread.start();
+    
+    while (eTest.GetNoMatch() == false && eTest.GetSuccess() == false)
+    {
+      try {
+        Thread.sleep(1000);
+      }
+      catch (InterruptedException ie) {
+        System.out.println("Thread interrupted");
+      } // end catch
+    } // end while
+    
+    try {
+      manager.Shutdown();
+      newThread.join();
+    }
+    catch (InterruptedException ie) {
+      System.out.println("Thread interrupted");
+    }
+    
+    if (eTest.GetNoMatch() != false)
+      return false;
+      
+    if (eTest.GetSuccess() != true)
+      return false;
+      
+    if (e2.GetNoMatch() != false)
+      return false;
+      
+    if (e2.GetSuccess() != true)
+      return false;
+      
+    if (e3.GetSuccess() != false && e3.GetNoMatch() != false)
+      return false;
+      
+    if (queue.contains(eTest))
+      return false;
+      
+    if (queue.contains(e2))
+      return false;
+      
+    if (queue.contains(e3) != true)
+      return false;
+      
+    if (eTest.GetTaken() != 2000)
+      return false;
+      
+    if (eTest.GetGiven() != 600)
+      return false;
+      
+    if (e2.GetTaken() != 600)
+      return false;
+      
+    if (e2.GetGiven() != 2000)
+      return false;
+    
+    System.out.println("/---- End Manager Test 3 ----/");
     
     return true;
   }
@@ -276,5 +509,11 @@ public class TestRunner {
       
     if (!(TestManager1()))
       System.out.println("Manager Test 1 Failed");
+      
+    if (!(TestManager2()))
+      System.out.println("Manager Test 2 Failed");
+      
+    if (!(TestManager3()))
+      System.out.println("Manager Test 3 Failed");
   }
 }

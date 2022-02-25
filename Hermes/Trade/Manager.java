@@ -41,7 +41,7 @@ public class Manager implements Runnable {
         // Check that the queue isn't empty
         if (queue_m.isEmpty())
         {
-          try { // try to sleep the thread
+          try { // try to sleep the thread if it is empty
             Thread.sleep(100);
           }
           catch (InterruptedException ie) {
@@ -55,7 +55,7 @@ public class Manager implements Runnable {
         
         Entry current;
       
-        // get the head
+        // Try to get the head
         try {
           current = queue_m.take();
         }
@@ -64,21 +64,25 @@ public class Manager implements Runnable {
           continue;
         } // end catch
 
-        // make sure this one hasn't been handled
+        // make sure this one hasn't been handled, which shouldn't happen
         if (current.GetNoMatch() == true || current.GetSuccess() == true)
           continue;
         
         // Check and make sure that this isn't a surplus
+        // If it is a surplus, it will be handled when a need arises for it
         if (current.IsSurplus())
         {
-          try {
+          try { // Place it at the tail
             queue_m.put(current);
           }
           catch (InterruptedException ie)
           { }
-          continue;
+          finally {
+            continue;
+          }
         } // end if
-        // Create a placeholder for the best offer
+        
+        // Create a placeholder for the best offer encountered
         Entry bestOffer = null;
       
         AtomicReference<Country> req_country;
@@ -101,11 +105,11 @@ public class Manager implements Runnable {
               
               if (entry.GetNeed().GetAmount() <= current.GetOffer().GetAmount())
               { // This is perfect case scenario
-                entry.SetTaken(current.GetOffer().GetAmount());
-                current.SetGiven(current.GetOffer().GetAmount());
+                entry.SetTaken(entry.GetOffer().GetAmount());
+                current.SetGiven(entry.GetOffer().GetAmount());
               
-                entry.SetGiven(entry.GetNeed().GetAmount());
-                current.SetTaken(entry.GetNeed().GetAmount());
+                entry.SetGiven(current.GetOffer().GetAmount());
+                current.SetTaken(current.GetOffer().GetAmount());
                 
                 success = true;
                 break;
@@ -114,9 +118,13 @@ public class Manager implements Runnable {
             else
             {
               if (bestOffer == null) // check and see if we have a best offer so far
+              {
                 bestOffer = entry;
+              }
               else if (entry.GetOffer().GetAmount() > bestOffer.GetOffer().GetAmount())
+              {
                 bestOffer = entry;
+              }
             } // end else
           }  // if
         } // end for
@@ -141,20 +149,17 @@ public class Manager implements Runnable {
       
         // If we get here, we don't have a perfect match. We need to 
         // See if a trade is still possible.
-        long current_need = current.GetNeed().GetAmount();
-        long current_offer = current.GetOffer().GetAmount();
-      
-        long bestOffer_need = bestOffer.GetNeed().GetAmount();
-        long bestOffer_offer = bestOffer.GetOffer().GetAmount();
-        
-        // We know that the offer is less than the need
+        // 
+        // If this statement is true, we know that the current offer is 
+        // less than the need of the current trade country.
+        // We just take what the country is offering and give what it needs
         if (bestOffer.GetNeed().GetAmount() < current.GetOffer().GetAmount())
         {
           bestOffer.SetTaken(bestOffer.GetOffer().GetAmount());
           current.SetGiven(bestOffer.GetOffer().GetAmount());
               
-          bestOffer.SetGiven(current.GetOffer().GetAmount());
-          current.SetTaken(current.GetOffer().GetAmount());
+          bestOffer.SetGiven(bestOffer.GetNeed().GetAmount());
+          current.SetTaken(bestOffer.GetNeed().GetAmount());
           
           boolean ifcheck = current.SetSuccessToTrue();
           ifcheck = bestOffer.SetSuccessToTrue();
@@ -163,18 +168,21 @@ public class Manager implements Runnable {
         }
         else
         {
-          double multiplier = (double) bestOffer.GetNeed().GetAmount()/
-                              (double) bestOffer.GetOffer().GetAmount();
+          // If we get here, the need of the trading country is more than
+          // we have to give, and they have less than what we need.
+          // We need to find out how much each offered resource costs.
+          double multiplier = (double) bestOffer.GetOffer().GetAmount()/
+                              (double) bestOffer.GetNeed().GetAmount();
                             
           long final_offer = (long)Math.floor(
-            (double)current.GetOffer().GetAmount() / multiplier
+            (double)current.GetOffer().GetAmount() * multiplier
           );
-        
-          bestOffer.SetTaken(current.GetOffer().GetAmount());
-          current.SetGiven(current.GetOffer().GetAmount());
+
+          bestOffer.SetTaken(final_offer);
+          current.SetGiven(final_offer);
           
-          bestOffer.SetGiven(final_offer);
-          current.SetTaken(final_offer);
+          bestOffer.SetGiven(current.GetOffer().GetAmount());
+          current.SetTaken(current.GetOffer().GetAmount());
           
           boolean elsecheck = current.SetSuccessToTrue();
           elsecheck = bestOffer.SetSuccessToTrue();
