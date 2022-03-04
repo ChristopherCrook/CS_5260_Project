@@ -78,12 +78,13 @@ public class TestRunner {
     String test = new String("test");
     String file = new String("countries.csv");
     String name = new String("Picon");
+    String output = new String(name).concat(new String("_output.txt"));
     
     narnia.schedule(
       name,
       file,
       test,
-      test,
+      output,
       1,
       1,
       1
@@ -107,12 +108,13 @@ public class TestRunner {
     String test = new String("test");
     String file = new String("countries.csv");
     String name = new String("Picon");
+    String output = new String(name).concat(new String("_output.txt"));
     
     narnia.schedule(
       name,
       file,
       test,
-      test,
+      output,
       1,
       1,
       1
@@ -172,12 +174,13 @@ public class TestRunner {
     String test = new String("test");
     String file = new String("countries.csv");
     String name = new String("Picon");
+    String output = new String(name).concat(new String("_output.txt"));
     
     narnia.schedule(
       name,
       file,
       test,
-      test,
+      output,
       1,
       1,
       1
@@ -207,11 +210,15 @@ public class TestRunner {
     String caprica_name = new String("Caprica");
     String gemenon_name = new String("Gemenon");
     String aquaria_name = new String("Aquaria");
+    String p_output = new String(picon_name).concat(new String("_output.txt"));
+    String c_output = new String(caprica_name).concat(new String("_output.txt"));
+    String g_output = new String(gemenon_name).concat(new String("_output.txt"));
+    String a_output = new String(aquaria_name).concat(new String("_output.txt"));
     
-    Picon.schedule(picon_name, file, test, test, 1, 1, 1);
-    Caprica.schedule(caprica_name, file, test, test, 1, 1, 1);
-    Gemenon.schedule(gemenon_name, file, test, test, 1, 1, 1);
-    Aquaria.schedule(aquaria_name, file, test, test, 1, 1, 1);
+    Picon.schedule(picon_name, file, test, p_output, 1, 1, 1);
+    Caprica.schedule(caprica_name, file, test, c_output, 1, 1, 1);
+    Gemenon.schedule(gemenon_name, file, test, g_output, 1, 1, 1);
+    Aquaria.schedule(aquaria_name, file, test, a_output, 1, 1, 1);
     
     ArrayBlockingQueue<Entry> queue = new ArrayBlockingQueue<>(10);
     Manager manager = new Manager();
@@ -322,10 +329,13 @@ public class TestRunner {
     String picon_name = new String("Picon");
     String gemenon_name = new String("Gemenon");
     String aquaria_name = new String("Aquaria");
+    String p_output = new String(picon_name).concat(new String("_output.txt"));
+    String g_output = new String(gemenon_name).concat(new String("_output.txt"));
+    String a_output = new String(aquaria_name).concat(new String("_output.txt"));
     
-    Picon.schedule(picon_name, file, test, test, 1, 1, 1);
-    Gemenon.schedule(gemenon_name, file, test, test, 1, 1, 1);
-    Aquaria.schedule(aquaria_name, file, test, test, 1, 1, 1);
+    Picon.schedule(picon_name, file, test, p_output, 1, 1, 1);
+    Gemenon.schedule(gemenon_name, file, test, g_output, 1, 1, 1);
+    Aquaria.schedule(aquaria_name, file, test, a_output, 1, 1, 1);
     
     ArrayBlockingQueue<Entry> queue = new ArrayBlockingQueue<>(10);
     Manager manager = new Manager();
@@ -434,10 +444,13 @@ public class TestRunner {
     String picon_name = new String("Picon");
     String gemenon_name = new String("Gemenon");
     String aquaria_name = new String("Aquaria");
+    String p_output = new String(picon_name).concat(new String("_output.txt"));
+    String g_output = new String(gemenon_name).concat(new String("_output.txt"));
+    String a_output = new String(aquaria_name).concat(new String("_output.txt"));
     
-    Picon.schedule(picon_name, file, test, test, 1, 1, 1);
-    Gemenon.schedule(gemenon_name, file, test, test, 1, 1, 1);
-    Aquaria.schedule(aquaria_name, file, test, test, 1, 1, 1);
+    Picon.schedule(picon_name, file, test, p_output, 1, 1, 1);
+    Gemenon.schedule(gemenon_name, file, test, g_output, 1, 1, 1);
+    Aquaria.schedule(aquaria_name, file, test, a_output, 1, 1, 1);
     
     ArrayBlockingQueue<Entry> queue = new ArrayBlockingQueue<>(10);
     Manager manager = new Manager();

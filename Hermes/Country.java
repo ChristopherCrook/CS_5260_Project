@@ -8,7 +8,8 @@ import Hermes.Trade.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import java.util.*; 
-import java.io.*; 
+import java.io.*;
+import java.io.BufferedWriter;
 
 //! Class declaration for a Country
 public class Country implements Runnable, Scheduler {
@@ -57,6 +58,7 @@ public class Country implements Runnable, Scheduler {
   private int depth_m;
   private int frontier_m;
   private String output_m;
+  private BufferedWriter writer_m;
 
   //! Constructor
   public Country()
@@ -114,8 +116,10 @@ public class Country implements Runnable, Scheduler {
         frontier_max_size < 1)
         return;
         
+    // Assign name of the country    
     name_m = name;
     
+    // These variables are used to read the CSV contents
     String line = new String();
     String splitBy = new String(",");
     
@@ -152,8 +156,18 @@ public class Country implements Runnable, Scheduler {
     
     // Placeholder to get resource weights from initial_state_filename XXX
     
-    // Set the output file name
+    // Set the output file name and create the BufferedReader
     output_m = new String(output_schedule_filename.toCharArray());
+    
+    try {
+      writer_m = new BufferedWriter(new FileWriter(output_m));
+      writer_m.write(new String(name_m).concat(new String(" file started")));
+      writer_m.flush();
+    }
+    catch (IOException e)
+    {
+      System.out.println("File error!");
+    }
     
     // Set the scheduler variables
     schedules_m = num_output_schedules;
