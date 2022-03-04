@@ -170,9 +170,15 @@ public class Country implements Runnable, Scheduler {
   
   }
   
+  //! Recursive method to iterate over nodes
+  public void GenerateNode()
+  {
+  
+  }
+  
   //! Method to calculate the current state, which is very complicated
   //! XXX TO-DO make this simpler somehow
-  protected boolean CalculateStatus()
+  public boolean CalculateStatus(Status status)
   {
     // List of statuses
     ArrayList<Boolean> temp_status = new ArrayList<>(Arrays.asList(
@@ -374,7 +380,7 @@ public class Country implements Runnable, Scheduler {
     
     // Set Status class instance with values set by above statements
     boolean check = false;
-    check = status_m.get().Set_Status(temp_status);
+    check = status.Set_Status(temp_status);
     
     if (!(check))
     {
@@ -391,7 +397,7 @@ public class Country implements Runnable, Scheduler {
     temp_deficits.set(6, Long.valueOf(housing_deficit));
     temp_deficits.set(7, Long.valueOf(housing_waste_under));
     
-    check = status_m.get().Set_Deficits(temp_deficits);
+    check = status.Set_Deficits(temp_deficits);
     
     if (!(check))
     {
@@ -408,14 +414,14 @@ public class Country implements Runnable, Scheduler {
     temp_surplus.set(6, Long.valueOf(housing_surplus));
     temp_surplus.set(7, Long.valueOf(housing_waste_over));
     
-    check = status_m.get().Set_Surplus(temp_surplus);
+    check = status.Set_Surplus(temp_surplus);
     
     if (!(check))
     {
       System.out.println("Failed to set Surplus");
       return false;
     }
-      
+    
     return true;
   }
   

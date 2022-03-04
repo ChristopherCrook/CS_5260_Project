@@ -1,10 +1,14 @@
 import java.util.*;
+
 import Hermes.Resources.Resource;
+import Hermes.Resources.Status;
 import Hermes.Transforms.*;
 import Hermes.Country;
 import Hermes.Trade.*;
 
+
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 
 //! Class to test Hermes classes
 public class TestRunner {
@@ -154,6 +158,37 @@ public class TestRunner {
       return false;
     
     System.out.println("/---- End Entry Test ----/");
+    return true;
+  }
+  
+  //! Test the Country class ability to calculate a Status
+  public static boolean TestStatus()
+  {
+    System.out.println("/--- Begin Status Test ---/");
+    Country narnia = new Country();
+    
+    Status stat = new Status();
+    
+    String test = new String("test");
+    String file = new String("countries.csv");
+    String name = new String("Picon");
+    
+    narnia.schedule(
+      name,
+      file,
+      test,
+      test,
+      1,
+      1,
+      1
+    );
+    
+    //narnia.printDetails();
+    boolean check = narnia.CalculateStatus(stat);
+    stat.Print();
+    
+    System.out.println("/---- End Status Test ----/");
+    
     return true;
   }
   
@@ -503,6 +538,9 @@ public class TestRunner {
       
     if (!(TestCountry()))
       System.out.println("Country Test Failed");
+      
+    if (!(TestStatus()))
+      System.out.println("Status Test Failed");
       
     if (!(TestEntry()))
       System.out.println("Entry Test Failed");
