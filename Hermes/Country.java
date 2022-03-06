@@ -54,13 +54,13 @@ public class Country implements Runnable, Scheduler {
   private volatile boolean configured_m;
   
   //! Variables that are set by the user via the schedule() method
-  private int schedules_m;
-  private int depth_m;
-  private int frontier_m;
+  private volatile int schedules_m;
+  private volatile int depth_m;
+  private volatile int frontier_m;
   private String output_m;
   private BufferedWriter writer_m;
 
-  //! Constructor
+  //! Constructor // ----------------------------------------------------------
   public Country()
   {
     // Initialize private variables
@@ -83,19 +83,19 @@ public class Country implements Runnable, Scheduler {
     configured_m = false;
   }
   
-  //! Method to set the blocking queue
+  //! Method to set the blocking queue // ------------------------------------
   public void SetQueue(ArrayBlockingQueue<Entry> queue)
   {
     queue_m = queue;
   }
   
-  //! Method to get country name
+  //! Method to get country name // ------------------------------------------
   public String GetName()
   {
     return name_m;
   }
   
-  //! Inherited schedule method from Scheduler
+  //! Inherited schedule method from Scheduler // ----------------------------
   public void schedule(
     String name,
     String resource_filename,
@@ -178,21 +178,119 @@ public class Country implements Runnable, Scheduler {
     configured_m = true;
   }
   
-  //! Overloaded run() method inherited from Runnable
+  //!--------------------------------------------------------------------------
+  
+  //! Overloaded run() method inherited from Runnable // ----------------------
   public void run()
   {
-  
+    // This is the HashMap that will hold our search results
+    HashMap<String, Status> mMap = new HashMap<>();
+    
+    // Calculate Initial Status
+    Status initial = new Status();
+    
+    boolean check = CalculateStatus(initial);
+    if (!(check))
+    {
+      System.out.println("Error setting initial state");
+      return;
+    }
+    
+    // Set initial state
+    status_m.set(initial);
+    mMap.put(new String("Initial"), initial);
+    
+    // Set counter values
+    AtomicInteger count = new AtomicInteger(0);
+    
+    // Begin Node search
+    GenerateNode(mMap, initial, count);
+    
   }
   
-  //! Recursive method to iterate over nodes
-  public void GenerateNode()
+  //! Recursive method to iterate over nodes // -------------------------------
+  public void GenerateNode(
+    HashMap<String, Status> map,
+    Status state,
+    AtomicInteger i
+  )
   {
+    // Increment the count
+    i.set(i.get() + 1);
+    
+  /*  // Determine the immediate need based on our hierarchy
+    // this is going to get complicated
+    //
+    // Do we need population?
+    if (state.Get_Status()[0] == true) // Do we need population
+    {
+      // Yes
+      Resource need = CreateResource(
+        state.values_m.get(0),
+        state.Get_Deficits().get(0).longValue()
+      );
+      
+      Resource offer = null;
+      // Need to find something to trade
+      if (state.HasSurplus())
+      {
+        offer = CreateResource(
+          state.values_m.get(GetHighestSurplusPosition(state)),
+          state.Get_Surplus().get(GetHighestSurplusPosition(state))
+        );
+      }
+      else
+      {
+        
+      }
+        
+    } // end if */
+     
+    
+    // Test the frontier and bound limit
+    if (frontier_m == i.get() || bound_m == i.get())
+      return;
+  }
   
+  //! -------------------------------------------------------------------------
+  
+  //! Method to get the highest surplus
+  public int GetHighestSurplusPosition(Status status)
+  {
+    int pos = -1;
+    long surplus = 0;
+    int count = 0;
+    
+    for (Long l : status.Get_Surplus())
+    {
+      if (l.longValue() > surplus)
+      {
+        surplus = l.longValue();
+        pos = count;
+      } // end if
+      count++;
+    } // end for
+      
+    return pos;
+  }
+  
+  //! Method to get a Resource from a Status
+  public Resource CreateResource(Status status, int pos)
+  {
+    if (pos < 0)
+      return null;
+      
+    Resource returned = new Resource(
+      status.values_m.get(pos),
+      status.Get_Surplus().get(pos).longValue()
+    );
+    
+    return returned;
   }
   
   //! Method to calculate the current state, which is very complicated
   //! XXX TO-DO make this simpler somehow
-  public boolean CalculateStatus(Status status)
+  public boolean CalculateStatus(Status status) // ----------------------------
   {
     // List of statuses
     ArrayList<Boolean> temp_status = new ArrayList<>(Arrays.asList(
@@ -439,7 +537,7 @@ public class Country implements Runnable, Scheduler {
     return true;
   }
   
-  //! Troubleshooting method to print country name and current Resource values
+  //! Test Method to print country name and current Resource values //---------
   public void printDetails()
   {
     System.out.println(name_m);
@@ -453,9 +551,33 @@ public class Country implements Runnable, Scheduler {
     System.out.println(housingWaste_m.get().GetName() + ": " + housingWaste_m.get().GetAmount());    
   }
   
+  //! Passthrough call to print the overall Country status // -----------------
   public void printStatus()
   {
     status_m.get().Print();
+  }
+  
+  //! Logging method to print a status to the configured log file  // ---------
+  public void exportStatus(Status status) // ----------------------------------
+  {
+    String state = new String();
+    
+    for (Boolean b : status.Get_Status())
+    {
+      if (b.booleanValue() == true)
+        state.concat(new String("true; "));
+      else
+        state.concat(new String("false; "));
+    }
+    
+    try {
+      writer_m.write(state);
+      writer_m.flush();
+    }
+    catch (IOException e)
+    {
+      System.out.println("File write error!");
+    }
   }
 
 }

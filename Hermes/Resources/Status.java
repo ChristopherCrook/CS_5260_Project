@@ -23,7 +23,7 @@ public class Status {
   //! Variable for list of surpluses in same order as status_m
   private ArrayList<Long> surplus_m;
   
-  private static ArrayList<String> values_m = new ArrayList<String>(
+  public static ArrayList<String> values_m = new ArrayList<String>(
             Arrays.asList("Population",
                           "Metallic Elements",
                           "Timber",
@@ -133,6 +133,23 @@ public class Status {
   public ArrayList<Long> Get_Deficits()
   {
     return deficits_m;
+  }
+  
+  //! Have a Surplus?
+  public boolean HasSurplus()
+  {
+    int count = -1;
+    for (Long l : surplus_m)
+    {
+      count++;
+      if (count == 4 || count == 7)
+        continue;
+        
+      if (l > 0)
+        return true;
+    }
+    
+    return false;
   }
   
   public void Print()
