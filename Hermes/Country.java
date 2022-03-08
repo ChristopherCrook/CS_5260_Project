@@ -218,41 +218,233 @@ public class Country implements Runnable, Scheduler {
     // Increment the count
     i.set(i.get() + 1);
     
-  /*  // Determine the immediate need based on our hierarchy
+     // Test the frontier and bound limit
+    if (frontier_m < i.get() || bound_m < i.get())
+      return;
+    
+    // Placeholder variables
+    Resource need = null;
+    Resource offer = null;
+    
+    boolean current_need_found = false;
+    
+    // Determine the immediate need based on our hierarchy
     // this is going to get complicated
     //
     // Do we need population?
     if (state.Get_Status()[0] == true) // Do we need population
     {
       // Yes
-      Resource need = CreateResource(
+      need = CreateResource(
         state.values_m.get(0),
         state.Get_Deficits().get(0).longValue()
       );
       
-      Resource offer = null;
-      // Need to find something to trade
-      if (state.HasSurplus())
+      current_need_found = true;
+    } // end if
+    // Do we need houses?
+    else if (state.Get_Status()[6] == true && current_need_found == false)
+    {
+      // Yes
+      // Do we have enough materials to make them? If we do, we call a 
+      // transform. If not we get what we need first.
+      
+      if (state.Get_Status()[1] == true)
       {
-        offer = CreateResource(
-          state.values_m.get(GetHighestSurplusPosition(state)),
-          state.Get_Surplus().get(GetHighestSurplusPosition(state))
+        need = CreateResource(
+          state.values_m.get(1),
+          state.Get_Deficits().get(1).longValue()
         );
+      
+        current_need_found = true;
+      }
+      else if (state.Get_Status()[3] == true && current_need_found == false)
+      {
+        // We need alloys. If we get here, we assume we can make them
+        
+        // Initiate transform
+        boolean r;
+        
+        for (long i = 0; i < state.Get_Deficits().get(3).longValue(); i++)
+        {
+          r = a_trans_m.Transform(
+            population_m,
+            metallicElems_m,
+            metallicAlloys_m,
+            metallicAlloyWaste_m
+          );
+          
+          if (!(r))
+              System.out.print(name_m + ": Error performing Alloy Transform");
+        } // end for
+        
+        // Create next iteration Status and add to map
+        String a_t = new String("Performed Alloy Transform: ");
+        a_t.concat(state.Get_Deficits().get(3).toString());
+
+        map.put(new String(a_t), state);
+          
+        result = this.CalculateStatus(state);
+        this.GenerateNode(map, state, i);
+          
+        return;
+      }
+      else if (state.Get_Status()[2] == true && current_need_found == false)
+      {
+        // We need timber
+        need = CreateResource(
+          state.values_m.get(2),
+          state.Get_Deficits().get(2).longValue()
+        );
+      
+        current_need_found = true;
       }
       else
       {
-        
+        if (!(current_need_found))
+        {
+          // Build houses
+          boolean result;
+          
+          // Loop until we have the amount needed
+          for (long i = 0; i < state.Get_Deficits().get(6).longValue(); i++)
+          {
+            result = h_trans_m.Transform(
+              population_m,
+              metallicElems_m,
+              timber_m,
+              metallicAlloys_m,
+              housing_m,
+              housingWaste_m
+            );
+            next iteration Status and add to map
+            if (!(result))
+              System.out.print(name_m + ": Error performing Housing Transform");
+          } // end for
+          // Create next iteration Status and add to map
+          String h_t = new String("Performed Housing Transform: ");
+          h_t.concat(state.Get_Deficits().get(6).toString());
+
+          map.put(new String(h_t), state);
+          
+          result = this.CalculateStatus(state);
+          this.GenerateNode(map, state, i);
+          
+          return;
+        } // end if !current_need_found
+      } // end else
+    } // else if (housing needed)
+    // Do we need electronics?
+    else if (state.Get_Status()[5] == true && current_need_found == false)
+    {
+      // Yes
+      // Do we have enough materials to make them? If we do, we call a 
+      // transform. If not we get what we need first.
+      
+      if (state.Get_Status()[1] == true)
+      {
+        need = CreateResource(
+          state.values_m.get(1),
+          state.Get_Deficits().get(1).longValue()
+        );
+      
+        current_need_found = true;
       }
+      else if (state.Get_Status()[3] == true && current_need_found == false)
+      {
+        // We need alloys. If we get here, we assume we can make them
         
-    } // end if */
-     
-    
-    // Test the frontier and bound limit
-    if (frontier_m == i.get() || bound_m == i.get())
+        // Initiate transform
+        boolean r;
+        
+        for (long i = 0; i < state.Get_Deficits().get(3).longValue(); i++)
+        {
+          r = a_trans_m.Transform(
+            population_m,
+            metallicElems_m,
+            metallicAlloys_m,
+            metallicAlloyWaste_m
+          );
+          
+          if (!(r))
+              System.out.print(name_m + ": Error performing Alloy Transform");
+        } // end for
+        
+        // Create next iteration Status and add to map
+        String a_t = new String("Performed Alloy Transform: ");
+        a_t.concat(state.Get_Deficits().get(3).toString());
+
+        map.put(new String(a_t), state);
+          
+        result = this.CalculateStatus(state);
+        this.GenerateNode(map, state, i);
+          
+        return;
+      } // end else if
+      else
+      {
+        if (!(current_need_found))
+        {
+          // We have everything we need to make electronics
+          // Initiate Transform
+          
+          // Create next iteration Status and add to map
+          
+          return;
+        } // end if !current_need_found
+      } // end else
+      
+    } // end else if (electronics need)
+    // Do we have a surplus?
+    else // We don't need Houses or Electronics
+    {      
+      // Check and see if we have a deficit anywhere
+      
+      
+      // if we get here, we don't need anything
+      if (GetHighestSurplusPosition(state) > 0)
+      {
+        // Create new trade 
+      }
+      
+      // if we get here, we don't need anything or have anything to offer
+      // we are balanced
       return;
+    }
+    
+    // Process the Trade based on current_need
+    
+    // This return should not be reached
+    System.out.println("End return reached. unforeseen condition");
+    return;
   }
   
   //! -------------------------------------------------------------------------
+  
+  //! Method to get the lowest resource amount we have
+  public Resource GetLowestResource(Status status)
+  {
+    int pos = -1;
+    long lowest = -1;
+    int count = 0;
+    
+    ArrayList<Resource> list = new ArrayList<>();
+    list.add(population_m.get());
+    list.add(metallicElems_m.get());
+    list.add(timber_m.get());
+    list.add(metallicAlloys_m.get());
+    list.add(electronics_m.get());
+    
+    for (int i = 0; i < list.size(); i++)
+    {
+      if (lowest < 0)
+        lowest = list.get(i).GetAmount();
+      else if (list.get(i).GetAmount() < lowest)
+        lowest = list.get(i).GetAmount();
+    }    
+      
+    return list.stream().filter(l -> l.GetAmount() == lowest).findFirst();
+  }
   
   //! Method to get the highest surplus
   public int GetHighestSurplusPosition(Status status)
