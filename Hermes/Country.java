@@ -226,10 +226,11 @@ public class Country implements Runnable, Scheduler {
     Resource need = null;
     Resource offer = null;
     
+    // Set a flag for finding a needed resource
     boolean current_need_found = false;
     
     // Determine the immediate need based on our hierarchy
-    // this is going to get complicated
+    //
     //
     // Do we need population?
     if (state.Get_Status()[0] == true) // Do we need population
@@ -242,6 +243,7 @@ public class Country implements Runnable, Scheduler {
       
       current_need_found = true;
     } // end if
+    //
     // Do we need houses?
     else if (state.Get_Status()[6] == true && current_need_found == false)
     {
@@ -249,6 +251,7 @@ public class Country implements Runnable, Scheduler {
       // Do we have enough materials to make them? If we do, we call a 
       // transform. If not we get what we need first.
       
+      // Do we have enough metallic elements?
       if (state.Get_Status()[1] == true)
       {
         need = CreateResource(
@@ -258,10 +261,10 @@ public class Country implements Runnable, Scheduler {
       
         current_need_found = true;
       }
+      // Do we have enough alloys
       else if (state.Get_Status()[3] == true && current_need_found == false)
       {
-        // We need alloys. If we get here, we assume we can make them
-        
+        // Yes. If we get here, we assume we can make them
         // Initiate transform
         boolean r;
         
@@ -289,9 +292,10 @@ public class Country implements Runnable, Scheduler {
           
         return;
       }
+      // Do we need Timber?
       else if (state.Get_Status()[2] == true && current_need_found == false)
       {
-        // We need timber
+        // Yes
         need = CreateResource(
           state.values_m.get(2),
           state.Get_Deficits().get(2).longValue()
@@ -299,11 +303,14 @@ public class Country implements Runnable, Scheduler {
       
         current_need_found = true;
       }
+      // We have everything we need to make a house
       else
       {
+        // This should never be true, but just in case
         if (!(current_need_found))
         {
           // Build houses
+          // create a return variable
           boolean result;
           
           // Loop until we have the amount needed
@@ -340,8 +347,7 @@ public class Country implements Runnable, Scheduler {
       // Yes
       // Do we have enough materials to make them? If we do, we call a 
       // transform. If not we get what we need first.
-      
-      if (state.Get_Status()[1] == true)
+      if (state.Get_Status()[1] == true && current_need_found == false)
       {
         need = CreateResource(
           state.values_m.get(1),
@@ -350,10 +356,10 @@ public class Country implements Runnable, Scheduler {
       
         current_need_found = true;
       }
+      // Do we need alloys?
       else if (state.Get_Status()[3] == true && current_need_found == false)
       {
-        // We need alloys. If we get here, we assume we can make them
-        
+        // Yes. If we get here, we assume we can make them       
         // Initiate transform
         boolean r;
         
@@ -387,41 +393,255 @@ public class Country implements Runnable, Scheduler {
         {
           // We have everything we need to make electronics
           // Initiate Transform
+          boolean t;
+        
+          for (long i = 0; i < state.Get_Deficits().get(3).longValue(); i++)
+          {
+              t = e_trans_m.Transform(
+              population_m,
+              metallicElems_m,
+              metallicAlloys_m,
+              electronics_m,
+              metallicAlloyWaste_m
+            );
           
+            if (!(t))
+                System.out.print(name_m + ": Error performing Electronics Transform");
+          } // end for
+        
           // Create next iteration Status and add to map
+          String e_t = new String("Performed Electronics Transform: ");
+          e_t.concat(state.Get_Deficits().get(5).toString());
+
+          map.put(new String(e_t), state);
+          
+          result = this.CalculateStatus(state);
+          this.GenerateNode(map, state, i);
           
           return;
         } // end if !current_need_found
       } // end else
-      
     } // end else if (electronics need)
-    // Do we have a surplus?
-    else // We don't need Houses or Electronics
+    // 
+    else // We don't need People, Houses or Electronics
     {      
       // Check and see if we have a deficit anywhere
-      
-      
-      // if we get here, we don't need anything
-      if (GetHighestSurplusPosition(state) > 0)
+      /*for (long i = 0; i < state.Get_Deficits().size(); i++)
       {
-        // Create new trade 
-      }
+        if (state.Get_Deficits().get(i).longValue() > 0)
+        {
+          need = CreateResource(
+          state.values_m.get(i),
+          state.Get_Deficits().get(i).longValue()
+        );
+      
+        current_need_found = true;
+        }
+      } */ //XXX This block may not be needed. If we don't need
+      // People, houses or electronics, do we care?
+      // If so, update the Update methods
       
       // if we get here, we don't need anything or have anything to offer
       // we are balanced
+    } // else
+    
+    // Get the Trade process started if we have a need
+    if (current_need_found)
+    {
+      // Create the offer
+      int s = this.GetHighestSurplusPosition(state);
+      
+      long offer_amount 0;
+      if (need.GetAmount() > state.Get_Surlus().get().longValue())
+      {
+        // Try to trade what we have
+        offer_amount = state.Get_Surlus().get().longValue();
+      }
+      else
+      {
+        offer_amount = need.GetAmount();
+      }
+      
+      offer = CreateResource(
+        state.values_m.get(s),
+        offer_amount
+      );
+      
+      // Now we create the Entry
+      Entry trade = new Entry(
+        this.GetName(),
+        offer,
+        need,
+        false
+      );
+      
+      // Add it to the queue
+      queue_m.add(trade);
+      while (trade.GetNoMatch() == false && trade.GetSuccess() == false)
+      {
+        try {
+          Thread.sleep(1000);
+        }
+        catch (InterruptedException ie) {
+          System.out.println("Thread interrupted");
+        } // end catch
+      } // end while
+      
+      // We have a result
+      // Check and see if it failed
+      if (trade.GetNoMatch())
+      {
+        // We are dead in the water
+        String f = new String("Trade Failed for ");
+        f.concat(need.GetName());
+        
+        map.put(new String(f), state);
+        
+        return;
+      }
+      
+      // Extract the result
+      this.AssignNewValues(trade);
+      
+      // Generate the new node
+      String tr = new String("Traded for ");
+      tr.concat(need.GetName());
+        
+      map.put(new String(tr), state);
+      
+      result = this.CalculateStatus(state);
+      this.GenerateNode(map, state, i);
+      
+      return;
+    } // end if current_need_found
+    // If we get here, we check if we have a surplus because we don't need anything
+    if (GetHighestSurplusPosition(state) > 0)
+    {
+      // Create new trade
+      need = new Resource(
+        this.GetLowestResource(state).GetName(),
+        state.Get_Surplus().get(GetHighestSurplusPosition(state)).longValue()
+      );
+      
+      offer = CreateResource(
+        state.values_m.get(GetHighestSurplusPosition(state)),
+        state.Get_Surplus().get(GetHighestSurplusPosition(state)).longValue()
+      );
+      
+      // Now we create the Entry
+      Entry trade = new Entry(
+        this.GetName(),
+        offer,
+        need,
+        true
+      );
+      
+      // Add it to the queue
+      queue_m.add(trade);
+      while (trade.GetSuccess() == false)
+      {
+        try {
+          Thread.sleep(1000);
+        }
+        catch (InterruptedException ie) {
+          System.out.println("Thread interrupted");
+        } // end catch
+      } // end while
+      
+      // Extract the result
+      this.AssignNewValues(trade);
+      
+      // Generate new node
+      String ts = new String("Traded Surplus for ");
+      ts.concat(need.GetName());
+        
+      map.put(new String(ts), state);
+      
+      result = this.CalculateStatus(state);
+      this.GenerateNode(map, state, i);
+      
+      return;
+    } // end if (GetHighestSurplusPosition(state) > 0)
+    
+    // We have the perfect system, Flynn!!!
+    System.out.println(this.GetName() + "State is optimal");
+    String o = new String("State is optimal")
+        
+    map.put(new String(tr), state);
+    return;
+  }
+  
+  //! Method to set the results of a trade
+  protected void AssignNewValues(Entry entry)
+  {
+    String need  = new String(entry.GetNeed().GetName());
+    String offer = new String(entry.GetOffer().GetName());
+    
+    // Start with what was needed
+    if (need.equals(POPULATION))
+    {
+      population_m.get().SetAmount() = 
+        population_m.get().SetAmount() + entry.GetGiven();
+    }
+    else if (need.equals(METALLICELEMS))
+    {
+      metallicElems_m.get().SetAmount() = 
+        metallicElems_m.get().SetAmount() + entry.GetGiven();
+    }
+    else if (need.equals(TIMBER))
+    {
+      timber_m.get().SetAmount() = 
+        timber_m.get().SetAmount() + entry.GetGiven();
+    }
+    else
+    {
+      // Invalid case
+      System.out.println("Error trying to assign the results of an unexpected type");
       return;
     }
     
-    // Process the Trade based on current_need
-    
-    // This return should not be reached
-    System.out.println("End return reached. unforeseen condition");
-    return;
+    // Now get the offer
+    if (offer.equals(POPULATION))
+    {
+      population_m.get().SetAmount() = 
+        population_m.get().SetAmount() - entry.GetTaken();
+    }
+    else if (offer.equals(METALLICELEMS))
+    {
+      metallicElems_m.get().SetAmount() = 
+        metallicElems_m.get().SetAmount() - entry.GetTaken();
+    }
+    else if (offer.equals(TIMBER))
+    {
+      timber_m.get().SetAmount() = 
+        timber_m.get().SetAmount() - entry.GetTaken();
+    }
+    else if (offer.equals(METALLICALLOY))
+    {
+      metallicAlloys_m.get().SetAmount() = 
+        metallicAlloys_m.get().SetAmount() - entry.GetTaken();
+    }
+    else if (offer.equals(ELECTRONICS))
+    {
+      electronics_m.get().SetAmount() = 
+        electronics_m.get().SetAmount() - entry.GetTaken();
+    }
+    else if (offer.equals(HOUSING))
+    {
+      housing_m.get().SetAmount() = 
+        housing_m.get().SetAmount() - entry.GetTaken();
+    }
+    else
+    {
+      // Invalid case
+      System.out.println("Error trying to assign the results of an unexpected type");
+      return;
+    } // end else
   }
   
   //! -------------------------------------------------------------------------
   
-  //! Method to get the lowest resource amount we have
+  //! Method to get the lowest resource amount we have //----------------------
   public Resource GetLowestResource(Status status)
   {
     int pos = -1;
@@ -446,7 +666,7 @@ public class Country implements Runnable, Scheduler {
     return list.stream().filter(l -> l.GetAmount() == lowest).findFirst();
   }
   
-  //! Method to get the highest surplus
+  //! Method to get the highest surplus // ------------------------------------
   public int GetHighestSurplusPosition(Status status)
   {
     int pos = -1;
