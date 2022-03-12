@@ -219,7 +219,7 @@ public class Country implements Runnable, Scheduler {
     i.set(i.get() + 1);
     
      // Test the frontier and bound limit
-    if (frontier_m < i.get() || bound_m < i.get())
+    if (this.frontier_m < i.get() || this.depth_m < i.get())
       return;
     
     // Placeholder variables
@@ -233,10 +233,10 @@ public class Country implements Runnable, Scheduler {
     //
     //
     // Do we need population?
-    if (state.Get_Status()[0] == true) // Do we need population
+    if (state.Get_Status().get(0) == true) // Do we need population
     {
       // Yes
-      need = CreateResource(
+      need = new Resource(
         state.values_m.get(0),
         state.Get_Deficits().get(0).longValue()
       );
@@ -245,16 +245,16 @@ public class Country implements Runnable, Scheduler {
     } // end if
     //
     // Do we need houses?
-    else if (state.Get_Status()[6] == true && current_need_found == false)
+    else if (state.Get_Status().get(6) == true && current_need_found == false)
     {
       // Yes
       // Do we have enough materials to make them? If we do, we call a 
       // transform. If not we get what we need first.
       
       // Do we have enough metallic elements?
-      if (state.Get_Status()[1] == true)
+      if (state.Get_Status().get(1) == true)
       {
-        need = CreateResource(
+        need = new Resource(
           state.values_m.get(1),
           state.Get_Deficits().get(1).longValue()
         );
@@ -262,19 +262,19 @@ public class Country implements Runnable, Scheduler {
         current_need_found = true;
       }
       // Do we have enough alloys
-      else if (state.Get_Status()[3] == true && current_need_found == false)
+      else if (state.Get_Status().get(3) == true && current_need_found == false)
       {
         // Yes. If we get here, we assume we can make them
         // Initiate transform
         boolean r;
         
-        for (long i = 0; i < state.Get_Deficits().get(3).longValue(); i++)
+        for (long it = 0; it < state.Get_Deficits().get(3).longValue(); it++)
         {
           r = a_trans_m.Transform(
-            population_m,
-            metallicElems_m,
-            metallicAlloys_m,
-            metallicAlloyWaste_m
+            population_m.get(),
+            metallicElems_m.get(),
+            metallicAlloys_m.get(),
+            metallicAlloysWaste_m.get()
           );
           
           if (!(r))
@@ -287,16 +287,16 @@ public class Country implements Runnable, Scheduler {
 
         map.put(new String(a_t), state);
           
-        result = this.CalculateStatus(state);
+        boolean result = this.CalculateStatus(state);
         this.GenerateNode(map, state, i);
           
         return;
       }
       // Do we need Timber?
-      else if (state.Get_Status()[2] == true && current_need_found == false)
+      else if (state.Get_Status().get(2) == true && current_need_found == false)
       {
         // Yes
-        need = CreateResource(
+        need = new Resource(
           state.values_m.get(2),
           state.Get_Deficits().get(2).longValue()
         );
@@ -314,17 +314,17 @@ public class Country implements Runnable, Scheduler {
           boolean result;
           
           // Loop until we have the amount needed
-          for (long i = 0; i < state.Get_Deficits().get(6).longValue(); i++)
+          for (long it = 0; it < state.Get_Deficits().get(6).longValue(); it++)
           {
             result = h_trans_m.Transform(
-              population_m,
-              metallicElems_m,
-              timber_m,
-              metallicAlloys_m,
-              housing_m,
-              housingWaste_m
+              population_m.get(),
+              metallicElems_m.get(),
+              timber_m.get(),
+              metallicAlloys_m.get(),
+              housing_m.get(),
+              housingWaste_m.get()
             );
-            next iteration Status and add to map
+            // Get next iteration Status and add to map
             if (!(result))
               System.out.print(name_m + ": Error performing Housing Transform");
           } // end for
@@ -342,14 +342,14 @@ public class Country implements Runnable, Scheduler {
       } // end else
     } // else if (housing needed)
     // Do we need electronics?
-    else if (state.Get_Status()[5] == true && current_need_found == false)
+    else if (state.Get_Status().get(5) == true && current_need_found == false)
     {
       // Yes
       // Do we have enough materials to make them? If we do, we call a 
       // transform. If not we get what we need first.
-      if (state.Get_Status()[1] == true && current_need_found == false)
+      if (state.Get_Status().get(1) == true && current_need_found == false)
       {
-        need = CreateResource(
+        need = new Resource(
           state.values_m.get(1),
           state.Get_Deficits().get(1).longValue()
         );
@@ -357,19 +357,19 @@ public class Country implements Runnable, Scheduler {
         current_need_found = true;
       }
       // Do we need alloys?
-      else if (state.Get_Status()[3] == true && current_need_found == false)
+      else if (state.Get_Status().get(3) == true && current_need_found == false)
       {
         // Yes. If we get here, we assume we can make them       
         // Initiate transform
         boolean r;
         
-        for (long i = 0; i < state.Get_Deficits().get(3).longValue(); i++)
+        for (long it = 0; it < state.Get_Deficits().get(3).longValue(); it++)
         {
           r = a_trans_m.Transform(
-            population_m,
-            metallicElems_m,
-            metallicAlloys_m,
-            metallicAlloyWaste_m
+            population_m.get(),
+            metallicElems_m.get(),
+            metallicAlloys_m.get(),
+            metallicAlloysWaste_m.get()
           );
           
           if (!(r))
@@ -382,7 +382,7 @@ public class Country implements Runnable, Scheduler {
 
         map.put(new String(a_t), state);
           
-        result = this.CalculateStatus(state);
+        boolean result = this.CalculateStatus(state);
         this.GenerateNode(map, state, i);
           
         return;
@@ -395,14 +395,14 @@ public class Country implements Runnable, Scheduler {
           // Initiate Transform
           boolean t;
         
-          for (long i = 0; i < state.Get_Deficits().get(3).longValue(); i++)
+          for (long it = 0; it < state.Get_Deficits().get(3).longValue(); it++)
           {
               t = e_trans_m.Transform(
-              population_m,
-              metallicElems_m,
-              metallicAlloys_m,
-              electronics_m,
-              metallicAlloyWaste_m
+              population_m.get(),
+              metallicElems_m.get(),
+              metallicAlloys_m.get(),
+              electronics_m.get(),
+              metallicAlloysWaste_m.get()
             );
           
             if (!(t))
@@ -415,7 +415,7 @@ public class Country implements Runnable, Scheduler {
 
           map.put(new String(e_t), state);
           
-          result = this.CalculateStatus(state);
+          boolean result = this.CalculateStatus(state);
           this.GenerateNode(map, state, i);
           
           return;
@@ -451,25 +451,25 @@ public class Country implements Runnable, Scheduler {
       // Create the offer
       int s = this.GetHighestSurplusPosition(state);
       
-      long offer_amount 0;
-      if (need.GetAmount() > state.Get_Surlus().get().longValue())
+      long offer_amount = 0;
+      if (need.GetAmount() > state.Get_Surplus().get(s).longValue())
       {
         // Try to trade what we have
-        offer_amount = state.Get_Surlus().get().longValue();
+        offer_amount = state.Get_Surplus().get(s).longValue();
       }
       else
       {
         offer_amount = need.GetAmount();
       }
       
-      offer = CreateResource(
+      offer = new Resource(
         state.values_m.get(s),
         offer_amount
       );
       
       // Now we create the Entry
       Entry trade = new Entry(
-        this.GetName(),
+        this,
         offer,
         need,
         false
@@ -509,7 +509,7 @@ public class Country implements Runnable, Scheduler {
         
       map.put(new String(tr), state);
       
-      result = this.CalculateStatus(state);
+      boolean result = this.CalculateStatus(state);
       this.GenerateNode(map, state, i);
       
       return;
@@ -523,14 +523,14 @@ public class Country implements Runnable, Scheduler {
         state.Get_Surplus().get(GetHighestSurplusPosition(state)).longValue()
       );
       
-      offer = CreateResource(
+      offer = new Resource(
         state.values_m.get(GetHighestSurplusPosition(state)),
         state.Get_Surplus().get(GetHighestSurplusPosition(state)).longValue()
       );
       
       // Now we create the Entry
       Entry trade = new Entry(
-        this.GetName(),
+        this,
         offer,
         need,
         true
@@ -557,7 +557,7 @@ public class Country implements Runnable, Scheduler {
         
       map.put(new String(ts), state);
       
-      result = this.CalculateStatus(state);
+      boolean result = this.CalculateStatus(state);
       this.GenerateNode(map, state, i);
       
       return;
@@ -565,9 +565,9 @@ public class Country implements Runnable, Scheduler {
     
     // We have the perfect system, Flynn!!!
     System.out.println(this.GetName() + "State is optimal");
-    String o = new String("State is optimal")
+    String o = new String("State is optimal");
         
-    map.put(new String(tr), state);
+    map.put(new String(o), state);
     return;
   }
   
@@ -580,18 +580,18 @@ public class Country implements Runnable, Scheduler {
     // Start with what was needed
     if (need.equals(POPULATION))
     {
-      population_m.get().SetAmount() = 
-        population_m.get().SetAmount() + entry.GetGiven();
+      population_m.get().SetAmount(
+        population_m.get().GetAmount() + entry.GetGiven());
     }
     else if (need.equals(METALLICELEMS))
     {
-      metallicElems_m.get().SetAmount() = 
-        metallicElems_m.get().SetAmount() + entry.GetGiven();
+      metallicElems_m.get().SetAmount( 
+        metallicElems_m.get().GetAmount() + entry.GetGiven());
     }
     else if (need.equals(TIMBER))
     {
-      timber_m.get().SetAmount() = 
-        timber_m.get().SetAmount() + entry.GetGiven();
+      timber_m.get().SetAmount(
+        timber_m.get().GetAmount() + entry.GetGiven());
     }
     else
     {
@@ -603,33 +603,33 @@ public class Country implements Runnable, Scheduler {
     // Now get the offer
     if (offer.equals(POPULATION))
     {
-      population_m.get().SetAmount() = 
-        population_m.get().SetAmount() - entry.GetTaken();
+      population_m.get().SetAmount( 
+        population_m.get().GetAmount() - entry.GetTaken());
     }
     else if (offer.equals(METALLICELEMS))
     {
-      metallicElems_m.get().SetAmount() = 
-        metallicElems_m.get().SetAmount() - entry.GetTaken();
+      metallicElems_m.get().SetAmount( 
+        metallicElems_m.get().GetAmount() - entry.GetTaken());
     }
     else if (offer.equals(TIMBER))
     {
-      timber_m.get().SetAmount() = 
-        timber_m.get().SetAmount() - entry.GetTaken();
+      timber_m.get().SetAmount( 
+        timber_m.get().GetAmount() - entry.GetTaken());
     }
     else if (offer.equals(METALLICALLOY))
     {
-      metallicAlloys_m.get().SetAmount() = 
-        metallicAlloys_m.get().SetAmount() - entry.GetTaken();
+      metallicAlloys_m.get().SetAmount( 
+        metallicAlloys_m.get().GetAmount() - entry.GetTaken());
     }
     else if (offer.equals(ELECTRONICS))
     {
-      electronics_m.get().SetAmount() = 
-        electronics_m.get().SetAmount() - entry.GetTaken();
+      electronics_m.get().SetAmount( 
+        electronics_m.get().GetAmount() - entry.GetTaken());
     }
     else if (offer.equals(HOUSING))
     {
-      housing_m.get().SetAmount() = 
-        housing_m.get().SetAmount() - entry.GetTaken();
+      housing_m.get().SetAmount( 
+        housing_m.get().GetAmount() - entry.GetTaken());
     }
     else
     {
@@ -663,7 +663,13 @@ public class Country implements Runnable, Scheduler {
         lowest = list.get(i).GetAmount();
     }    
       
-    return list.stream().filter(l -> l.GetAmount() == lowest).findFirst();
+    for (int i = 0; i < list.size(); i++)
+    {
+      if (list.get(i).GetAmount() == lowest)
+        return list.get(i);
+    }
+
+    return null;
   }
   
   //! Method to get the highest surplus // ------------------------------------
@@ -687,7 +693,7 @@ public class Country implements Runnable, Scheduler {
   }
   
   //! Method to get a Resource from a Status
-  public Resource CreateResource(Status status, int pos)
+ /* public Resource CreateResource(String name, long value)
   {
     if (pos < 0)
       return null;
@@ -698,7 +704,7 @@ public class Country implements Runnable, Scheduler {
     );
     
     return returned;
-  }
+  } */
   
   //! Method to calculate the current state, which is very complicated
   //! XXX TO-DO make this simpler somehow
