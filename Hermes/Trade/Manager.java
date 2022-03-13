@@ -14,11 +14,14 @@ public class Manager implements Runnable {
   //! Private Variables
   private static ArrayBlockingQueue<Entry> queue_m;
   private static volatile boolean shutdown_m;
+
+  private volatile int count_m;
   
   //! Constructor
   public Manager()
   {
     shutdown_m = false;
+    count_m = 0;
   }
   
   //! Method to set the blocking queue
@@ -43,17 +46,27 @@ public class Manager implements Runnable {
         {
           try { // try to sleep the thread if it is empty
             Thread.sleep(100);
+            count_m++;
           }
           catch (InterruptedException ie) {
            // do nothing
           }
           finally
           {
+            if (count_m == 100)
+            {
+              System.out.println("Trade Manager timing out");
+              return;
+            }
+
             continue;
           }
         } // end if isEmpty()
         
         Entry current;
+
+        // reset the count
+        count_m = 0;
       
         // Try to get the head
         try {
@@ -141,10 +154,17 @@ public class Manager implements Runnable {
       
         if (bestOffer == null)
         {
-          boolean check = current.SetNoMatchToTrue();
-          queue_m.remove(current);
-          
-          continue;
+          //boolean check = current.SetNoMatchToTrue(); //XXX
+          // Added this for troubleshooting. If no match, we attempt
+          // to wait for a better condition
+          try { // Place it at the tail 
+            queue_m.put(current);
+          }
+          catch (InterruptedException ie)
+          { }
+          finally {
+            continue;
+          }
         }
       
         // If we get here, we don't have a perfect match. We need to 

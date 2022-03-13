@@ -24,6 +24,9 @@ public class Country implements Runnable, Scheduler {
   static final String ELECTRONICS = new String("electronics");
   static final String HOUSING = new String("housing");
   static final String HOUSINGWASTE = new String("housing waste");
+
+  //! Signal Flag to begin
+  public static volatile boolean BEGIN = false;
   
   //! Variable for the Queue
   private ArrayBlockingQueue<Entry> queue_m;
@@ -154,6 +157,9 @@ public class Country implements Runnable, Scheduler {
       System.out.println("File error!");
     }
     
+    // Calculate State
+    boolean check = this.CalculateStatus(this.status_m.get());
+
     // Placeholder to get resource weights from initial_state_filename XXX
     
     // Set the output file name and create the BufferedReader
@@ -184,7 +190,7 @@ public class Country implements Runnable, Scheduler {
   public void run()
   {
     // This is the HashMap that will hold our search results
-    HashMap<String, Status> mMap = new HashMap<>();
+    LinkedHashMap<String, Status> mMap = new LinkedHashMap<>();
     
     // Calculate Initial Status
     Status initial = new Status();
@@ -202,19 +208,36 @@ public class Country implements Runnable, Scheduler {
     
     // Set counter values
     AtomicInteger count = new AtomicInteger(0);
+
+    while (BEGIN == false)
+    {
+      try {
+        Thread.sleep(1000);
+      }
+      catch (InterruptedException ie) {
+        System.out.println("Thread interrupted");
+      } // end catch
+    }
     
     // Begin Node search
     GenerateNode(mMap, initial, count);
     
+    mMap.forEach((key, value) -> {
+      exportStatus(value, key);
+    });
+
+    // Calculate State
+    check = this.CalculateStatus(this.status_m.get());
   }
   
   //! Recursive method to iterate over nodes // -------------------------------
   public void GenerateNode(
-    HashMap<String, Status> map,
+    LinkedHashMap<String, Status> map,
     Status state,
     AtomicInteger i
   )
   {
+System.out.println(this.GetName() + " is in GenerateNode()");
     // Increment the count
     i.set(i.get() + 1);
     
@@ -283,12 +306,15 @@ public class Country implements Runnable, Scheduler {
         
         // Create next iteration Status and add to map
         String a_t = new String("Performed Alloy Transform: ");
-        a_t.concat(state.Get_Deficits().get(3).toString());
+        a_t = a_t.concat(state.Get_Deficits().get(3).toString());
 
-        map.put(new String(a_t), state);
+        Status newStatus = new Status();
+        boolean result = this.CalculateStatus(newStatus);
+
+        map.put(new String(a_t), newStatus);
           
-        boolean result = this.CalculateStatus(state);
-        this.GenerateNode(map, state, i);
+
+        this.GenerateNode(map, newStatus, i);
           
         return;
       }
@@ -330,12 +356,14 @@ public class Country implements Runnable, Scheduler {
           } // end for
           // Create next iteration Status and add to map
           String h_t = new String("Performed Housing Transform: ");
-          h_t.concat(state.Get_Deficits().get(6).toString());
+          h_t = h_t.concat(state.Get_Deficits().get(6).toString());
 
-          map.put(new String(h_t), state);
-          
-          result = this.CalculateStatus(state);
-          this.GenerateNode(map, state, i);
+          Status newStatus = new Status();
+          boolean r = this.CalculateStatus(newStatus);
+
+          map.put(new String(h_t), newStatus);
+
+          this.GenerateNode(map, newStatus, i);
           
           return;
         } // end if !current_need_found
@@ -378,12 +406,14 @@ public class Country implements Runnable, Scheduler {
         
         // Create next iteration Status and add to map
         String a_t = new String("Performed Alloy Transform: ");
-        a_t.concat(state.Get_Deficits().get(3).toString());
+        a_t = a_t.concat(state.Get_Deficits().get(3).toString());
 
-        map.put(new String(a_t), state);
+        Status newStatus = new Status();
+        boolean result = this.CalculateStatus(newStatus);
+
+        map.put(new String(a_t), newStatus);
           
-        boolean result = this.CalculateStatus(state);
-        this.GenerateNode(map, state, i);
+        this.GenerateNode(map, newStatus, i);
           
         return;
       } // end else if
@@ -411,12 +441,14 @@ public class Country implements Runnable, Scheduler {
         
           // Create next iteration Status and add to map
           String e_t = new String("Performed Electronics Transform: ");
-          e_t.concat(state.Get_Deficits().get(5).toString());
+          e_t = e_t.concat(state.Get_Deficits().get(5).toString());
 
-          map.put(new String(e_t), state);
+          Status newStatus = new Status();
+          boolean result = this.CalculateStatus(newStatus);
+
+          map.put(new String(e_t), newStatus);
           
-          boolean result = this.CalculateStatus(state);
-          this.GenerateNode(map, state, i);
+          this.GenerateNode(map, newStatus, i);
           
           return;
         } // end if !current_need_found
@@ -425,24 +457,8 @@ public class Country implements Runnable, Scheduler {
     // 
     else // We don't need People, Houses or Electronics
     {      
-      // Check and see if we have a deficit anywhere
-      /*for (long i = 0; i < state.Get_Deficits().size(); i++)
-      {
-        if (state.Get_Deficits().get(i).longValue() > 0)
-        {
-          need = CreateResource(
-          state.values_m.get(i),
-          state.Get_Deficits().get(i).longValue()
-        );
+      // Not sure what to do here yet
       
-        current_need_found = true;
-        }
-      } */ //XXX This block may not be needed. If we don't need
-      // People, houses or electronics, do we care?
-      // If so, update the Update methods
-      
-      // if we get here, we don't need anything or have anything to offer
-      // we are balanced
     } // else
     
     // Get the Trade process started if we have a need
@@ -475,12 +491,26 @@ public class Country implements Runnable, Scheduler {
         false
       );
       
-      // Add it to the queue
+      // Add it to the queue and set a timer
       queue_m.add(trade);
+      int timer = 0;
       while (trade.GetNoMatch() == false && trade.GetSuccess() == false)
       {
         try {
           Thread.sleep(1000);
+
+          if (timer == 20)
+          {
+            // We are dead in the water
+            String f = new String("Trade Failed for ");
+            f = f.concat(need.GetName());
+        
+            map.put(new String(f), state);
+        
+            return;
+          }
+          else
+            timer++;
         }
         catch (InterruptedException ie) {
           System.out.println("Thread interrupted");
@@ -493,7 +523,7 @@ public class Country implements Runnable, Scheduler {
       {
         // We are dead in the water
         String f = new String("Trade Failed for ");
-        f.concat(need.GetName());
+        f = f.concat(need.GetName());
         
         map.put(new String(f), state);
         
@@ -505,15 +535,18 @@ public class Country implements Runnable, Scheduler {
       
       // Generate the new node
       String tr = new String("Traded for ");
-      tr.concat(need.GetName());
+      tr = tr.concat(need.GetName());
         
-      map.put(new String(tr), state);
-      
-      boolean result = this.CalculateStatus(state);
-      this.GenerateNode(map, state, i);
+      Status newStatus = new Status();
+      boolean result = this.CalculateStatus(newStatus);
+
+      map.put(new String(tr), newStatus);
+          
+      this.GenerateNode(map, newStatus, i);
       
       return;
     } // end if current_need_found
+
     // If we get here, we check if we have a surplus because we don't need anything
     if (GetHighestSurplusPosition(state) > 0)
     {
@@ -536,29 +569,57 @@ public class Country implements Runnable, Scheduler {
         true
       );
       
-      // Add it to the queue
+      // Add it to the queue and set a wait timer
       queue_m.add(trade);
+      int timer = 0;
+
       while (trade.GetSuccess() == false)
       {
         try {
           Thread.sleep(1000);
+
+          if (timer == 20)
+          {
+            // We have the perfect system, Flynn!!!
+            System.out.println(this.GetName() + "State is optimal");
+            String o = new String("State is optimal");
+        
+            map.put(new String(o), state);
+        
+            return;
+          }
+          else
+            timer++;
         }
         catch (InterruptedException ie) {
           System.out.println("Thread interrupted");
         } // end catch
       } // end while
+
+      if (trade.GetNoMatch())
+      {
+        // We have the perfect system, Flynn!!!
+        System.out.println(this.GetName() + "State is optimal");
+        String o = new String("State is optimal");
+        
+        map.put(new String(o), state);
+        
+        return;
+      }
       
       // Extract the result
       this.AssignNewValues(trade);
       
       // Generate new node
       String ts = new String("Traded Surplus for ");
-      ts.concat(need.GetName());
+      ts = ts.concat(need.GetName());
         
-      map.put(new String(ts), state);
-      
-      boolean result = this.CalculateStatus(state);
-      this.GenerateNode(map, state, i);
+      Status newStatus = new Status();
+      boolean result = this.CalculateStatus(newStatus);
+
+      map.put(new String(ts), newStatus);
+          
+      this.GenerateNode(map, newStatus, i);
       
       return;
     } // end if (GetHighestSurplusPosition(state) > 0)
@@ -692,20 +753,6 @@ public class Country implements Runnable, Scheduler {
     return pos;
   }
   
-  //! Method to get a Resource from a Status
- /* public Resource CreateResource(String name, long value)
-  {
-    if (pos < 0)
-      return null;
-      
-    Resource returned = new Resource(
-      status.values_m.get(pos),
-      status.Get_Surplus().get(pos).longValue()
-    );
-    
-    return returned;
-  } */
-  
   //! Method to calculate the current state, which is very complicated
   //! XXX TO-DO make this simpler somehow
   public boolean CalculateStatus(Status status) // ----------------------------
@@ -784,7 +831,13 @@ public class Country implements Runnable, Scheduler {
     }
         
     // Calculate need for houses based on an assumption of a 4-person household
-    if ((population_m.get().GetAmount() / housing_m.get().GetAmount()) > 4)
+    if (housing_m.get().GetAmount() < 1)
+    {
+      housing_deficit = population_m.get().GetAmount() / 4;
+      
+      temp_status.set(6, Boolean.valueOf(true)); // We need houses
+    }
+    else if ((population_m.get().GetAmount() / housing_m.get().GetAmount()) > 4)
     {
       housing_deficit = population_m.get().GetAmount() / 4;
       housing_deficit = housing_deficit - housing_m.get().GetAmount();
@@ -799,29 +852,37 @@ public class Country implements Runnable, Scheduler {
     
     // Calculate the need for electronics based on the assumption of 2
     // electronics per person
-    if ((electronics_m.get().GetAmount() / population_m.get().GetAmount()) < 2)
+    if (population_m.get().GetAmount() < 1)
+    {
+      if (electronics_m.get().GetAmount() > 0)
+      {
+        electronics_surplus = electronics_m.get().GetAmount();
+      }
+    }
+    else if ((electronics_m.get().GetAmount() / population_m.get().GetAmount()) < 1)
     {
       electronics_deficit = population_m.get().GetAmount() * 2;
       electronics_deficit = electronics_deficit - electronics_m.get().GetAmount();
       temp_status.set(5, Boolean.valueOf(true)); // need more electronics
     }
     else
-    {
-      if ((population_m.get().GetAmount() * 4) > electronics_m.get().GetAmount())
-        electronics_surplus = electronics_m.get().GetAmount() - (population_m.get().GetAmount() * 4);
+    { // if everyone has more than 2 electronics, then we have a surplus
+      if ((population_m.get().GetAmount() * 2) < electronics_m.get().GetAmount())
+        electronics_surplus = electronics_m.get().GetAmount() - (population_m.get().GetAmount() * 2);
     }
     
     // Calculate the need for alloys based on need for housing and need 
     // for electronics
     if (temp_status.get(6).booleanValue() == true)  // did we need houses?
     {                                               // houses take priority
-      if ((housing_deficit * 3) < metallicAlloys_m.get().GetAmount()) // do we have enough
+      if ((housing_deficit * 3) > metallicAlloys_m.get().GetAmount()) // do we have enough
       {                                                            // to build them?
         alloys_deficit = housing_deficit * 3;
         alloys_deficit = alloys_deficit - metallicAlloys_m.get().GetAmount();
         temp_status.set(3, Boolean.valueOf(true)); // need alloys
       }
     } // end if
+    // Did we need electronics?
     else if (temp_status.get(5).booleanValue() == true && alloys_deficit == 0)
     {
       if ((electronics_deficit * 2) > metallicAlloys_m.get().GetAmount())
@@ -870,7 +931,7 @@ public class Country implements Runnable, Scheduler {
     // Calculate Need for Timber
     if (temp_status.get(6).booleanValue() == true)
     {
-      if((housing_deficit * 5) < timber_m.get().GetAmount())
+      if((housing_deficit * 5) > timber_m.get().GetAmount())
       {
         timber_deficit = (housing_deficit * 5) - timber_m.get().GetAmount();
         temp_status.set(2, Boolean.valueOf(true)); // need timber
@@ -976,20 +1037,24 @@ public class Country implements Runnable, Scheduler {
   }
   
   //! Logging method to print a status to the configured log file  // ---------
-  public void exportStatus(Status status) // ----------------------------------
+  public void exportStatus(Status status, String event) // ----------------------------------
   {
-    String state = new String();
+    String state = new String("State: ");
     
     for (Boolean b : status.Get_Status())
     {
       if (b.booleanValue() == true)
-        state.concat(new String("true; "));
+        state = state.concat(new String("true; "));
       else
-        state.concat(new String("false; "));
+        state = state.concat(new String("false; "));
     }
     
     try {
+      writer_m.newLine();
       writer_m.write(state);
+      writer_m.flush();
+      writer_m.newLine();
+      writer_m.write(event);
       writer_m.flush();
     }
     catch (IOException e)

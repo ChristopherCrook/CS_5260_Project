@@ -14,4 +14,5 @@ javac Hermes/Trade/Entry.java
 javac Hermes/Trade/Manager.java
 
 javac TestRunner.java
+javac Test1.java
 ##javac -Xlint:deprecation TestRunner.java
