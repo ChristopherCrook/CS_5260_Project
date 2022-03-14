@@ -10,7 +10,12 @@ import Hermes.Trade.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 
-//! Class to test Hermes classes
+//! Class to test Hermes classes using the following conditions:
+//!
+//! There are two countries: Picon and Caprica
+//! Caprica needs houses and has no timber
+//! Picon is balanced except for a mass surplus of timber
+//!
 public class Test1 {
 
   //! Program Execution point

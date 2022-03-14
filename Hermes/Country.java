@@ -880,7 +880,11 @@ System.out.println(this.GetName() + " is in GenerateNode()");
         alloys_deficit = housing_deficit * 3;
         alloys_deficit = alloys_deficit - metallicAlloys_m.get().GetAmount();
         temp_status.set(3, Boolean.valueOf(true)); // need alloys
-      }
+      } // end if
+      else
+      {
+        alloys_surplus = metallicAlloys_m.get().GetAmount() - (housing_deficit * 3);
+      } // end else
     } // end if
     // Did we need electronics?
     else if (temp_status.get(5).booleanValue() == true && alloys_deficit == 0)
