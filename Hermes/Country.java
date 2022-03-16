@@ -16,14 +16,14 @@ public class Country implements Runnable, Scheduler {
 
   //! These are constant values used in populating the names of the 
   //! various atomic references for Resources
-  static final String POPULATION = new String("population");
-  static final String METALLICELEMS = new String("metallic elems");
-  static final String TIMBER = new String("timber");
-  static final String METALLICALLOY = new String("metallic alloys");
-  static final String METALLICWASTE = new String("metallic alloy waste");
-  static final String ELECTRONICS = new String("electronics");
-  static final String HOUSING = new String("housing");
-  static final String HOUSINGWASTE = new String("housing waste");
+  static final String POPULATION = new String("Population");
+  static final String METALLICELEMS = new String("Metallic Elements");
+  static final String TIMBER = new String("Timber");
+  static final String METALLICALLOY = new String("Metallic Alloys");
+  static final String METALLICWASTE = new String("Metallic Alloys Waste");
+  static final String ELECTRONICS = new String("Electronics");
+  static final String HOUSING = new String("Housing");
+  static final String HOUSINGWASTE = new String("Housing Waste");
 
   //! Signal Flag to begin
   public static volatile boolean BEGIN = false;
@@ -548,7 +548,7 @@ System.out.println(this.GetName() + " is in GenerateNode()");
     } // end if current_need_found
 
     // If we get here, we check if we have a surplus because we don't need anything
-    if (GetHighestSurplusPosition(state) > 0)
+    if (GetHighestSurplusPosition(state) > -1)
     {
       // Create new trade
       need = new Resource(
@@ -568,7 +568,7 @@ System.out.println(this.GetName() + " is in GenerateNode()");
         need,
         true
       );
-      
+
       // Add it to the queue and set a wait timer
       queue_m.add(trade);
       int timer = 0;
@@ -653,6 +653,21 @@ System.out.println(this.GetName() + " is in GenerateNode()");
     {
       timber_m.get().SetAmount(
         timber_m.get().GetAmount() + entry.GetGiven());
+    }
+    else if (need.equals(METALLICALLOY))
+    {
+      metallicAlloys_m.get().SetAmount(
+        metallicAlloys_m.get().GetAmount() + entry.GetGiven());
+    }
+    else if (need.equals(ELECTRONICS))
+    {
+      electronics_m.get().SetAmount( 
+        electronics_m.get().GetAmount() - entry.GetGiven());
+    }
+    else if (need.equals(HOUSING))
+    {
+      housing_m.get().SetAmount( 
+        housing_m.get().GetAmount() - entry.GetGiven());
     }
     else
     {
@@ -742,6 +757,12 @@ System.out.println(this.GetName() + " is in GenerateNode()");
     
     for (Long l : status.Get_Surplus())
     {
+      // Skip Wastes
+      if (count == 4 || count == 7)
+      {
+        count++;
+        continue;
+      }
       if (l.longValue() > surplus)
       {
         surplus = l.longValue();
