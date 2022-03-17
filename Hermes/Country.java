@@ -494,7 +494,7 @@ System.out.println(this.GetName() + " is in GenerateNode()");
       // Add it to the queue and set a timer
       queue_m.add(trade);
       int timer = 0;
-      while (trade.GetNoMatch() == false && trade.GetSuccess() == false)
+      while (trade.GetSuccess() == false)
       {
         try {
           Thread.sleep(1000);
@@ -502,6 +502,8 @@ System.out.println(this.GetName() + " is in GenerateNode()");
           if (timer == 20)
           {
             // We are dead in the water
+            boolean removed = queue_m.remove(trade);
+            
             String f = new String("Trade Failed for ");
             f = f.concat(need.GetName());
         
@@ -518,17 +520,6 @@ System.out.println(this.GetName() + " is in GenerateNode()");
       } // end while
       
       // We have a result
-      // Check and see if it failed
-      if (trade.GetNoMatch())
-      {
-        // We are dead in the water
-        String f = new String("Trade Failed for ");
-        f = f.concat(need.GetName());
-        
-        map.put(new String(f), state);
-        
-        return;
-      }
       
       // Extract the result
       this.AssignNewValues(trade);
@@ -580,6 +571,9 @@ System.out.println(this.GetName() + " is in GenerateNode()");
 
           if (timer == 20)
           {
+            // Remove the entry cause we're quitting
+            boolean removed = queue_m.remove(trade);
+            
             // We have the perfect system, Flynn!!!
             System.out.println(this.GetName() + "State is optimal");
             String o = new String("State is optimal");
@@ -595,17 +589,6 @@ System.out.println(this.GetName() + " is in GenerateNode()");
           System.out.println("Thread interrupted");
         } // end catch
       } // end while
-
-      if (trade.GetNoMatch())
-      {
-        // We have the perfect system, Flynn!!!
-        System.out.println(this.GetName() + "State is optimal");
-        String o = new String("State is optimal");
-        
-        map.put(new String(o), state);
-        
-        return;
-      }
       
       // Extract the result
       this.AssignNewValues(trade);

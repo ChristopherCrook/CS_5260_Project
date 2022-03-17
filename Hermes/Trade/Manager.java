@@ -106,6 +106,10 @@ public class Manager implements Runnable {
         // Go through the list in the queue and find matches
         for (Entry entry : queue_m)
         {
+        System.out.println(current.GetName() + " Current need: " + current.GetNeed().GetName() + " " + current.GetNeed().GetAmount()); //XXX
+              System.out.println(current.GetName() + " Current offer: " + current.GetOffer().GetName() + " " + current.GetOffer().GetAmount()); //XXX
+              System.out.println(entry.GetName() + " Entry need: " + entry.GetNeed().GetName() + " " + entry.GetNeed().GetAmount()); //XXX
+              System.out.println(entry.GetName() + " Entry offer: " + entry.GetOffer().GetName() + " " + entry.GetOffer().GetAmount()); //XXX
           if (entry.GetCountry().get().GetName().equals(current.GetCountry().get().GetName()))
             continue; // don't look at entries from the same country
             

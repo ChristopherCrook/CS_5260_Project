@@ -290,7 +290,7 @@ public class TestRunner {
     if (queue.contains(e2))
       return false;
       
-    if (queue.contains(e3))
+    if (!(queue.contains(e3)))
       return false;
       
     if (queue.contains(e4) != true)
@@ -398,9 +398,6 @@ public class TestRunner {
     if (e2.GetSuccess() != false)
       return false;
       
-    if (e2.GetNoMatch() != true)
-      return false;
-      
     if (queue.contains(eTest))
       return false;
       
@@ -409,9 +406,8 @@ public class TestRunner {
       
     // This should pass because it is not a surplus. Therefore, the manager
     // should try to find a match and fail.  
-    if (queue.contains(e2))
+    if (!(queue.contains(e2)))
       return false;
-      
       
     if (eTest.GetTaken() != 950)
       return false;
