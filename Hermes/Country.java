@@ -125,12 +125,12 @@ public class Country implements Runnable, Scheduler {
     // These variables are used to read the CSV contents
     String line = new String();
     String splitBy = new String(",");
+    boolean found = false;
     
     // Get the country info from the resource_filename
     try
     {
       BufferedReader resource_reader = new BufferedReader(new FileReader(resource_filename));
-      boolean found = false;
     
       while ((line = resource_reader.readLine()) != null)
       {
@@ -151,12 +151,19 @@ public class Country implements Runnable, Scheduler {
           break;
         } // end if
       } // end while
+      
+      resource_reader.close();
     }
     catch (IOException e)
     {
       System.out.println("File error!");
     }
     
+    
+    if (!(found))
+    {
+      System.out.println("File mismatch");
+    }
     // Calculate State
     boolean check = this.CalculateStatus(this.status_m.get());
 
@@ -237,7 +244,6 @@ public class Country implements Runnable, Scheduler {
     AtomicInteger i
   )
   {
-System.out.println(this.GetName() + " is in GenerateNode()");
     // Increment the count
     i.set(i.get() + 1);
     
@@ -540,71 +546,108 @@ System.out.println(this.GetName() + " is in GenerateNode()");
 
     // If we get here, we check if we have a surplus because we don't need anything
     if (GetHighestSurplusPosition(state) > -1)
-    {
-      // Create new trade
-      need = new Resource(
-        this.GetLowestResource(state).GetName(),
-        state.Get_Surplus().get(GetHighestSurplusPosition(state)).longValue()
-      );
-      
-      offer = new Resource(
-        state.values_m.get(GetHighestSurplusPosition(state)),
-        state.Get_Surplus().get(GetHighestSurplusPosition(state)).longValue()
-      );
-      
-      // Now we create the Entry
-      Entry trade = new Entry(
-        this,
-        offer,
-        need,
-        true
-      );
-
-      // Add it to the queue and set a wait timer
-      queue_m.add(trade);
-      int timer = 0;
-
-      while (trade.GetSuccess() == false)
+    {     
+      // Build a list of trades
+      LinkedList<Entry> trades = new LinkedList<>();
+      for (int c = 0; c < state.Get_Surplus().size(); c++)
       {
-        try {
-          Thread.sleep(1000);
-
-          if (timer == 20)
-          {
-            // Remove the entry cause we're quitting
-            boolean removed = queue_m.remove(trade);
-            
-            // We have the perfect system, Flynn!!!
-            System.out.println(this.GetName() + "State is optimal");
-            String o = new String("State is optimal");
-        
-            map.put(new String(o), state);
-        
-            return;
-          }
-          else
-            timer++;
-        }
-        catch (InterruptedException ie) {
-          System.out.println("Thread interrupted");
-        } // end catch
-      } // end while
-      
-      // Extract the result
-      this.AssignNewValues(trade);
-      
-      // Generate new node
-      String ts = new String("Traded Surplus for ");
-      ts = ts.concat(need.GetName());
-        
-      Status newStatus = new Status();
-      boolean result = this.CalculateStatus(newStatus);
-
-      map.put(new String(ts), newStatus);
+        if (c == 4 || c == 7)
+          continue;
           
-      this.GenerateNode(map, newStatus, i);
+        if (state.Get_Surplus().get(c).longValue() > 0)
+        {
+          if (state.values_m.get(c) == this.GetLowestResource(state).GetName())
+            continue;
+            
+          // Set the need
+          need = new Resource(
+            this.GetLowestResource(state).GetName(),
+            state.Get_Surplus().get(c).longValue()
+          );
+          offer = new Resource(
+            state.values_m.get(c),
+            state.Get_Surplus().get(c).longValue()
+          );
+          
+          Entry e = new Entry(this, offer, need, true);
+          trades.add(e);
+        }
+      }
       
-      return;
+      // Make sure we didn't end up with an empty list
+      if (trades.size() > 0)
+      {
+        for (Entry e : trades)
+          queue_m.add(e);
+          
+        boolean found = false;
+        int timer = 0;
+        
+        while (found == false)
+        {
+          try {
+            Thread.sleep(1000);
+
+            if (timer == 20)
+            {
+              // Remove the entries cause we're quitting
+              boolean removed;
+              
+              for (Entry e : trades)
+                removed = queue_m.remove(e);
+            
+              // We have the perfect system, Flynn!!!
+              System.out.println(this.GetName() + "State is optimal");
+              String o = new String("State is optimal");
+        
+              map.put(new String(o), state);
+        
+              return;
+            }
+            else
+            {
+              timer++;
+              // Check our trades
+              for (Entry e : trades)
+              {
+                if (e.GetSuccess())
+                {
+                  found = true;
+                } // end if
+              }  // for
+            } // end else
+          } // end try
+          catch (InterruptedException ie) {
+            System.out.println("Thread interrupted");
+          } // end catch
+        } // while
+        
+        Entry passed = null;
+        
+        for (Entry e : trades)
+        {
+          if (e.GetSuccess())
+            passed = e;
+          else
+            queue_m.remove(e);
+        } // end for
+        
+        // Extract the result
+        this.AssignNewValues(passed);
+      
+        // Generate new node
+        String ts = new String("Traded Surplus for ");
+        ts = ts.concat(need.GetName());
+        
+        Status newStatus = new Status();
+        boolean result = this.CalculateStatus(newStatus);
+
+        map.put(new String(ts), newStatus);
+          
+        this.GenerateNode(map, newStatus, i);
+      
+        return;
+      } // if (trades > 0)
     } // end if (GetHighestSurplusPosition(state) > 0)
     
     // We have the perfect system, Flynn!!!
