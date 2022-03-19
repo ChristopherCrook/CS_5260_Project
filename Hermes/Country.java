@@ -238,7 +238,7 @@ public class Country implements Runnable, Scheduler {
   }
   
   //! Recursive method to iterate over nodes // -------------------------------
-  public void GenerateNode(
+  private void GenerateNode(
     LinkedHashMap<String, Status> map,
     Status state,
     AtomicInteger i
@@ -248,8 +248,11 @@ public class Country implements Runnable, Scheduler {
     i.set(i.get() + 1);
     
      // Test the frontier and bound limit
-    if (this.frontier_m < i.get() || this.depth_m < i.get())
+    if (frontier_m < i.get() || depth_m < i.get())
+    {
+      System.out.println(GetName() + " reached max depth");
       return;
+    }
     
     // Placeholder variables
     Resource need = null;
@@ -315,12 +318,11 @@ public class Country implements Runnable, Scheduler {
         a_t = a_t.concat(state.Get_Deficits().get(3).toString());
 
         Status newStatus = new Status();
-        boolean result = this.CalculateStatus(newStatus);
+        boolean result = CalculateStatus(newStatus);
 
         map.put(new String(a_t), newStatus);
-          
 
-        this.GenerateNode(map, newStatus, i);
+        GenerateNode(map, newStatus, i);
           
         return;
       }
@@ -365,11 +367,11 @@ public class Country implements Runnable, Scheduler {
           h_t = h_t.concat(state.Get_Deficits().get(6).toString());
 
           Status newStatus = new Status();
-          boolean r = this.CalculateStatus(newStatus);
+          boolean r = CalculateStatus(newStatus);
 
           map.put(new String(h_t), newStatus);
 
-          this.GenerateNode(map, newStatus, i);
+          GenerateNode(map, newStatus, i);
           
           return;
         } // end if !current_need_found
@@ -381,6 +383,7 @@ public class Country implements Runnable, Scheduler {
       // Yes
       // Do we have enough materials to make them? If we do, we call a 
       // transform. If not we get what we need first.
+      // Do we need metallic elements?
       if (state.Get_Status().get(1) == true && current_need_found == false)
       {
         need = new Resource(
@@ -415,11 +418,11 @@ public class Country implements Runnable, Scheduler {
         a_t = a_t.concat(state.Get_Deficits().get(3).toString());
 
         Status newStatus = new Status();
-        boolean result = this.CalculateStatus(newStatus);
+        boolean result = CalculateStatus(newStatus);
 
         map.put(new String(a_t), newStatus);
           
-        this.GenerateNode(map, newStatus, i);
+        GenerateNode(map, newStatus, i);
           
         return;
       } // end else if
@@ -450,11 +453,11 @@ public class Country implements Runnable, Scheduler {
           e_t = e_t.concat(state.Get_Deficits().get(5).toString());
 
           Status newStatus = new Status();
-          boolean result = this.CalculateStatus(newStatus);
+          boolean result = CalculateStatus(newStatus);
 
           map.put(new String(e_t), newStatus);
           
-          this.GenerateNode(map, newStatus, i);
+          GenerateNode(map, newStatus, i);
           
           return;
         } // end if !current_need_found
@@ -471,9 +474,14 @@ public class Country implements Runnable, Scheduler {
     if (current_need_found)
     {
       // Create the offer
-      int s = this.GetHighestSurplusPosition(state);
+      int s = GetHighestSurplusPosition(state);
+      
+      // Check for error
+      if (s < 0)
+        s = GetHighestResourcePosition(need.GetName());
       
       long offer_amount = 0;
+      
       if (need.GetAmount() > state.Get_Surplus().get(s).longValue())
       {
         // Try to trade what we have
@@ -528,18 +536,18 @@ public class Country implements Runnable, Scheduler {
       // We have a result
       
       // Extract the result
-      this.AssignNewValues(trade);
+      AssignNewValues(trade);
       
       // Generate the new node
       String tr = new String("Traded for ");
       tr = tr.concat(need.GetName());
         
       Status newStatus = new Status();
-      boolean result = this.CalculateStatus(newStatus);
+      boolean result = CalculateStatus(newStatus);
 
       map.put(new String(tr), newStatus);
           
-      this.GenerateNode(map, newStatus, i);
+      GenerateNode(map, newStatus, i);
       
       return;
     } // end if current_need_found
@@ -556,12 +564,12 @@ public class Country implements Runnable, Scheduler {
           
         if (state.Get_Surplus().get(c).longValue() > 0)
         {
-          if (state.values_m.get(c) == this.GetLowestResource(state).GetName())
+          if (state.values_m.get(c) == GetLowestResource(state).GetName())
             continue;
             
           // Set the need
           need = new Resource(
-            this.GetLowestResource(state).GetName(),
+            GetLowestResource(state).GetName(),
             state.Get_Surplus().get(c).longValue()
           );
           offer = new Resource(
@@ -597,7 +605,7 @@ public class Country implements Runnable, Scheduler {
                 removed = queue_m.remove(e);
             
               // We have the perfect system, Flynn!!!
-              System.out.println(this.GetName() + "State is optimal");
+              System.out.println(GetName() + " is optimal");
               String o = new String("State is optimal");
         
               map.put(new String(o), state);
@@ -628,30 +636,30 @@ public class Country implements Runnable, Scheduler {
         {
           if (e.GetSuccess())
             passed = e;
-          else
-            queue_m.remove(e);
+
+          queue_m.remove(e);
         } // end for
         
         // Extract the result
-        this.AssignNewValues(passed);
+        AssignNewValues(passed);
       
         // Generate new node
         String ts = new String("Traded Surplus for ");
         ts = ts.concat(need.GetName());
         
         Status newStatus = new Status();
-        boolean result = this.CalculateStatus(newStatus);
+        boolean result = CalculateStatus(newStatus);
 
         map.put(new String(ts), newStatus);
           
-        this.GenerateNode(map, newStatus, i);
+        GenerateNode(map, newStatus, i);
       
         return;
       } // if (trades > 0)
     } // end if (GetHighestSurplusPosition(state) > 0)
     
     // We have the perfect system, Flynn!!!
-    System.out.println(this.GetName() + "State is optimal");
+    System.out.println(GetName() + " is optimal");
     String o = new String("State is optimal");
         
     map.put(new String(o), state);
@@ -742,6 +750,38 @@ public class Country implements Runnable, Scheduler {
   }
   
   //! -------------------------------------------------------------------------
+  
+  //! Method to get the position of the resouce with the highest amount //-----
+  public int GetHighestResourcePosition(String name)
+  {
+    int pos = 0;
+    long highest = 0;
+    String highest_name = new String();
+    
+    ArrayList<Resource> list = new ArrayList<>();
+    list.add(population_m.get());
+    list.add(metallicElems_m.get());
+    list.add(timber_m.get());
+    list.add(metallicAlloys_m.get());
+    list.add(electronics_m.get());
+    
+    for (Resource r : list)
+    {
+      if (r.GetAmount() > highest && name.equals(r.GetName()) == false)
+      {
+        highest = r.GetAmount();
+        highest_name = r.GetName();
+      }
+    } // end for
+    
+    for (String s: Status.values_m)
+    {
+      if (s.equals(highest_name))
+        pos = Status.values_m.indexOf(s);
+    }
+    
+    return pos;
+  }
   
   //! Method to get the lowest resource amount we have //----------------------
   public Resource GetLowestResource(Status status)

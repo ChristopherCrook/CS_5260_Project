@@ -58,7 +58,6 @@ public class Test3 {
     
     for (String s : names)
     {
-      System.out.println("s is " + s);
       Country p = new Country();
       p.SetQueue(queue);
       p.schedule(
@@ -67,11 +66,10 @@ public class Test3 {
         test,
         new String(s).concat(output),
         1,
-        10,
-        10
+        20,
+        20
       );
-      System.out.println("Country " + p.GetName() + ":------------");
-      p.printStatus();
+      //p.printStatus();
       countries.add(p);
     }
 
@@ -87,10 +85,22 @@ public class Test3 {
     mt.start();
 
     Country.BEGIN = true;
+    
+    while (queue.size() > 0)
+    {
+      try {
+        Thread.sleep(100);
+      }
+      catch (InterruptedException ie)
+      {
+        System.out.println("Thread interrupted");
+      }
+    }
 
     try {
       for (Thread tr : threads)
         tr.join();
+        
       manager.Shutdown();
       mt.join();
     }

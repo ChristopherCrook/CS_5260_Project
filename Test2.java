@@ -41,19 +41,10 @@ public class Test2 {
     String c_output = new String(caprica_name).concat(new String("_test2_output.txt"));
     String g_output = new String(gemenon_name).concat(new String("_test2_output.txt"));
 
-    Aerelon.schedule(aerelon_name, file, test, ae_output, 1, 5, 5);
-    Aquaria.schedule(aquaria_name, file, test, aq_output, 1, 5, 5);
-    Caprica.schedule(caprica_name, file, test, c_output, 1, 5, 5);
-    Gemenon.schedule(gemenon_name, file, test, g_output, 1, 5, 5);
-
-    System.out.println("/--- Aerelon Status ---/");
-    Aerelon.printStatus();
-    System.out.println("/--- Aquaria Status ---/");
-    Aquaria.printStatus();
-    System.out.println("/--- Caprica Status ---/");
-    Caprica.printStatus();
-    System.out.println("/--- Gemenon Status ---/");
-    Gemenon.printStatus();
+    Aerelon.schedule(aerelon_name, file, test, ae_output, 1, 10, 10);
+    Aquaria.schedule(aquaria_name, file, test, aq_output, 1, 10, 10);
+    Caprica.schedule(caprica_name, file, test, c_output, 1, 10, 10);
+    Gemenon.schedule(gemenon_name, file, test, g_output, 1, 10, 10);
 
     ArrayBlockingQueue<Entry> queue = new ArrayBlockingQueue<>(100);
     Manager manager = new Manager();
@@ -77,6 +68,17 @@ public class Test2 {
     gt.start();
 
     Country.BEGIN = true;
+    
+    while (queue.size() > 0)
+    {
+      try {
+        Thread.sleep(100);
+      }
+      catch (InterruptedException ie)
+      {
+        System.out.println("Thread interrupted");
+      }
+    }
 
     try {
       aet.join();
