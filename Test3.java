@@ -10,12 +10,7 @@ import Hermes.Trade.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 
-//! Class to test Hermes classes using the following conditions:
-//!
-//! There are three countries: Aerelon, Aquaria and Caprica
-//! Aerelon needs people
-//! Aquaria needs houses and the items to make them
-//! Caprica is doing great except for surpluses
+//! Class to test Hermes classes
 //!
 public class Test3 {
 

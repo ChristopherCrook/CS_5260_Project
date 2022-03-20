@@ -1128,7 +1128,7 @@ public class Country implements Runnable, Scheduler {
   }
   
   //! Logging method to print a status to the configured log file  // ---------
-  public void exportStatus(Status status, String event) // ----------------------------------
+  public void exportStatus(Status status, String event)
   {
     String state = new String("State: ");
     
@@ -1141,6 +1141,7 @@ public class Country implements Runnable, Scheduler {
     }
     
     try {
+      writer_m.newLine();
       writer_m.newLine();
       writer_m.write(state);
       writer_m.flush();
