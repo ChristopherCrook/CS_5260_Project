@@ -990,10 +990,6 @@ public class Country implements Runnable, Scheduler {
         alloys_deficit = alloys_deficit - metallicAlloys_m.get().GetAmount();
         temp_status.set(3, Boolean.valueOf(true)); // need alloys
       } // end if
-      else
-      {
-        alloys_surplus = metallicAlloys_m.get().GetAmount() - (housing_deficit * 3);
-      } // end else
     } // end if
     // Did we need electronics?
     else if (temp_status.get(5).booleanValue() == true && alloys_deficit == 0)
@@ -1024,7 +1020,7 @@ public class Country implements Runnable, Scheduler {
     {                                          // do we need houses?
       if (housing_deficit > metallicElems_m.get().GetAmount())
       {
-        metallic_deficit = metallicElems_m.get().GetAmount() - housing_deficit;
+        metallic_deficit = housing_deficit - metallicElems_m.get().GetAmount();
         temp_status.set(1, Boolean.valueOf(true)); // need metallic elements
       }
     }

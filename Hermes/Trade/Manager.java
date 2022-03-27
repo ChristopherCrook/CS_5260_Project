@@ -106,10 +106,6 @@ public class Manager implements Runnable {
         // Go through the list in the queue and find matches
         for (Entry entry : queue_m)
         {
-        //System.out.println(current.GetName() + " Current need: " + current.GetNeed().GetName() + " " + current.GetNeed().GetAmount()); //XXX
-              //System.out.println(current.GetName() + " Current offer: " + current.GetOffer().GetName() + " " + current.GetOffer().GetAmount()); //XXX
-              //System.out.println(entry.GetName() + " Entry need: " + entry.GetNeed().GetName() + " " + entry.GetNeed().GetAmount()); //XXX
-              //System.out.println(entry.GetName() + " Entry offer: " + entry.GetOffer().GetName() + " " + entry.GetOffer().GetAmount()); //XXX
           if (entry.GetCountry().get().GetName().equals(current.GetCountry().get().GetName()))
             continue; // don't look at entries from the same country
             
@@ -158,7 +154,6 @@ public class Manager implements Runnable {
       
         if (bestOffer == null)
         {
-          //boolean check = current.SetNoMatchToTrue(); //XXX
           // Added this for troubleshooting. If no match, we attempt
           // to wait for a better condition
           try { // Place it at the tail 
@@ -201,6 +196,19 @@ public class Manager implements Runnable {
           long final_offer = (long)Math.floor(
             (double)current.GetOffer().GetAmount() * multiplier
           );
+          
+          // Error check
+          if (final_offer < 1)
+          {
+            try { // Place it at the tail 
+            queue_m.put(current);
+            }
+            catch (InterruptedException ie)
+            { }
+            finally {
+              continue;
+            }
+          } // end if
 
           bestOffer.SetTaken(final_offer);
           current.SetGiven(final_offer);
@@ -212,7 +220,12 @@ public class Manager implements Runnable {
           elsecheck = bestOffer.SetSuccessToTrue();
           queue_m.remove(current);
           queue_m.remove(bestOffer);
-        } // else          
+        } // else
+        
+        // Troubleshooting print statements
+        //System.out.println(current.GetName() + " needed " + current.GetNeed().GetAmount() + " " + current.GetNeed().GetName());
+        //System.out.println("Traded " + current.GetTaken() + " " + current.GetOffer().GetName());
+        //System.out.println("for " + current.GetGiven() + " " + current.GetNeed().GetName());
       } // end while
 
   } // end run()
