@@ -535,6 +535,34 @@ public class TestRunner {
     
     return true;
   }
+  
+  //! Test the Country class Reduce methods
+  public static boolean TestReduce()
+  {
+    System.out.println("/--- Begin Reduce Test ---/");
+    Country narnia = new Country();
+    
+    String test = new String("test");
+    String file = new String("countries.csv");
+    String name = new String("Picon");
+    String output = new String(name).concat(new String("_output.txt"));
+    
+    narnia.schedule(
+      name,
+      file,
+      test,
+      output,
+      1,
+      1,
+      1
+    );
+    
+    
+    
+    System.out.println("/---- End Reduce Test ----/");
+    
+    return true;
+  }
 
   //! Program Execution point
   public static void main(String[] args)

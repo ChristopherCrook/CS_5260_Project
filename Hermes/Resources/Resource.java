@@ -41,4 +41,10 @@ public class Resource {
   //! Method to get the amount
   public long GetAmount()
   { return amount_m; }
+  
+  //! Method to return a copy of the Resource
+  public Resource Copy()
+  {
+    return new Resource(name_m, amount_m);
+  }
 }

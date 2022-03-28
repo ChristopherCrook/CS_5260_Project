@@ -669,7 +669,7 @@ public class Country implements Runnable, Scheduler {
   }
   
   //! Method to set the results of a trade
-  protected void AssignNewValues(Entry entry)
+  private void AssignNewValues(Entry entry)
   {
     String need  = new String(entry.GetNeed().GetName());
     String offer = new String(entry.GetOffer().GetName());
@@ -754,7 +754,7 @@ public class Country implements Runnable, Scheduler {
   //! -------------------------------------------------------------------------
   
   //! Method to get the position of the resouce with the highest amount //-----
-  public int GetHighestResourcePosition(String name)
+  private int GetHighestResourcePosition(String name)
   {
     int pos = 0;
     long highest = 0;
@@ -786,7 +786,7 @@ public class Country implements Runnable, Scheduler {
   }
   
   //! Method to get the lowest resource amount we have //----------------------
-  public Resource GetLowestResource(Status status)
+  private Resource GetLowestResource(Status status)
   {
     int pos = -1;
     long lowest = -1;
@@ -817,7 +817,7 @@ public class Country implements Runnable, Scheduler {
   }
   
   //! Method to get the highest surplus // ------------------------------------
-  public int GetHighestSurplusPosition(Status status)
+  private int GetHighestSurplusPosition(Status status)
   {
     int pos = -1;
     long surplus = 0;
@@ -1146,7 +1146,7 @@ public class Country implements Runnable, Scheduler {
   }
   
   //! Logging method to print a status to the configured log file  // ---------
-  public void exportStatus(Integer i, Node n)
+  private void exportStatus(Integer i, Node n)
   {
     String state = new String(i.toString());
     state = state.concat(new String(": State: "));
@@ -1172,6 +1172,56 @@ public class Country implements Runnable, Scheduler {
     {
       System.out.println("File write error!");
     }
+  }
+  
+  //! Method to perform a reduction of urban resources, given an implied action
+  public void Reduce_Urban(float modifier)
+  {
+    if (modifier > 1.1 || modifier < 0)
+      return;
+      
+    population_m.get().SetAmount(
+      population_m.get().GetAmount() - (long)(population_m.get().GetAmount() * modifier)
+    );
+    
+    housing_m.get().SetAmount(
+      housing_m.get().GetAmount() - (long)(housing_m.get().GetAmount() * modifier)
+    );
+    
+    electronics_m.get().SetAmount(
+      electronics_m.get().GetAmount() - (long)(electronics_m.get().GetAmount() * modifier)
+    );
+  }
+  
+  //! Method to perform a reduction of logistical resources, given an implied action
+  public void Reduce_Supplies(float modifier)
+  {
+    if (modifier > 1.1 || modifier < 0)
+      return;
+      
+    metallicElems_m.get().SetAmount(
+      metallicElems_m.get().GetAmount() - (long)(metallicElems_m.get().GetAmount() * modifier)
+    );
+    
+    metallicAlloys_m.get().SetAmount(
+      metallicAlloys_m.get().GetAmount() - (long)(metallicAlloys_m.get().GetAmount() * modifier)
+    );
+  }
+  
+  //! Method to get a list of the Countries Resources
+  public ArrayList<Resource> GetResources()
+  {
+    ArrayList<Resource> list = new ArrayList<>();
+    list.add(population_m.get().Copy());
+    list.add(metallicElems_m.get().Copy());
+    list.add(timber_m.get().Copy());
+    list.add(metallicAlloys_m.get().Copy());
+    list.add(metallicAlloysWaste_m.get().Copy());
+    list.add(electronics_m.get().Copy());
+    list.add(housing_m.get().Copy());
+    list.add(housingWaste_m.get().Copy());
+    
+    return list;
   }
 
 }
