@@ -197,26 +197,7 @@ public class Country implements Runnable, Scheduler {
   //! Overloaded run() method inherited from Runnable // ----------------------
   public void run()
   {
-    // This is the HashMap that will hold our search results
-    LinkedHashMap<Integer, Node> mMap = new LinkedHashMap<>();
-    
-    // Set counter values
-    AtomicInteger count = new AtomicInteger(0);
-    
-    // Calculate Initial Status
-    Status initial = new Status();
-    
-    boolean check = CalculateStatus(initial);
-    if (!(check))
-    {
-      System.out.println("Error setting initial state");
-      return;
-    }
-    
-    // Set initial state
-    status_m.set(initial);
-    mMap.put(Integer.valueOf(count.get()), new Node(initial, new String("Initial")));
-
+    // Wait on wait condition
     while (BEGIN == false)
     {
       try {
@@ -227,15 +208,38 @@ public class Country implements Runnable, Scheduler {
       } // end catch
     }
     
-    // Begin Node search
-    GenerateNode(mMap, initial, count);
+    for (int i = 0; i < schedules_m; i++)
+    {
+      // This is the HashMap that will hold our search results
+      LinkedHashMap<Integer, Node> mMap = new LinkedHashMap<>();
     
-    mMap.forEach((key, value) -> {
-      exportStatus(key, value);
-    });
+      // Set counter values
+      AtomicInteger count = new AtomicInteger(0);
+    
+      // Calculate Initial Status
+      Status initial = new Status();
+    
+      boolean check = CalculateStatus(initial);
+      if (!(check))
+      {
+        System.out.println("Error setting initial state");
+        return;
+      }
+    
+      // Set initial state
+      status_m.set(initial);
+      mMap.put(Integer.valueOf(count.get()), new Node(initial, new String("Initial")));
+      
+      // Begin Node search
+      GenerateNode(mMap, initial, count);
+    
+      mMap.forEach((key, value) -> {
+        exportStatus(key, value);
+      });
 
-    // Calculate State
-    check = this.CalculateStatus(this.status_m.get());
+      // Calculate State
+      check = this.CalculateStatus(this.status_m.get());
+    }
   }
   
   //! Recursive method to iterate over nodes // -------------------------------
