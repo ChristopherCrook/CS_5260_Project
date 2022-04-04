@@ -24,5 +24,10 @@ javac Test4.java
 javac Test5.java
 javac GenerateTest.java
 
+echo 'building Alien Invasion'
+javac Dice/TwentySidedDie.java
+javac AlienInvasion.java
+javac DieTest.java
+
 echo 'building complete'
 ##javac -Xlint:deprecation TestRunner.java

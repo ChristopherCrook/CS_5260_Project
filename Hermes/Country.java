@@ -1181,7 +1181,7 @@ public class Country implements Runnable, Scheduler {
   //! Method to perform a reduction of urban resources, given an implied action
   public void Reduce_Urban(float modifier)
   {
-    if (modifier > 1.1 || modifier < 0)
+    if (modifier > 1 || modifier < 0)
       return;
       
     population_m.get().SetAmount(
@@ -1200,7 +1200,7 @@ public class Country implements Runnable, Scheduler {
   //! Method to perform a reduction of logistical resources, given an implied action
   public void Reduce_Supplies(float modifier)
   {
-    if (modifier > 1.1 || modifier < 0)
+    if (modifier > 1 || modifier < 0)
       return;
       
     metallicElems_m.get().SetAmount(
