@@ -69,7 +69,7 @@ public class Test4 {
         file,
         test,
         new String(s).concat(output),
-        1,
+        3,
         20,
         20
       );

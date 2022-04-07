@@ -215,7 +215,18 @@ public class Country implements Runnable, Scheduler {
     
       // Set counter values
       AtomicInteger count = new AtomicInteger(0);
-    
+      
+      // Indicate the schedule in the log
+      try {
+        writer_m.newLine();
+        writer_m.newLine();
+        writer_m.write(new String("Schedule ").concat(String.valueOf(i + 1)));
+        writer_m.flush();
+      }
+      catch (IOException e)
+      {
+        System.out.println("File write error!");
+      }
       // Calculate Initial Status
       Status initial = new Status();
     
@@ -236,7 +247,17 @@ public class Country implements Runnable, Scheduler {
       mMap.forEach((key, value) -> {
         exportStatus(key, value);
       });
-
+      
+      // Get log ready for next entry
+      try {
+        writer_m.newLine();
+        writer_m.newLine();
+        writer_m.flush();
+      }
+      catch (IOException e)
+      {
+        System.out.println("File write error!");
+      }
       // Calculate State
       check = this.CalculateStatus(this.status_m.get());
     }
@@ -611,7 +632,7 @@ public class Country implements Runnable, Scheduler {
                 removed = queue_m.remove(e);
             
               // We have the perfect system, Flynn!!!
-              System.out.println(GetName() + " is optimal");
+              //System.out.println(GetName() + " is optimal");
               String o = new String("State is optimal");
         
               map.put(Integer.valueOf(i.get()), new Node(state, o));
