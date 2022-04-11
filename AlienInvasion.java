@@ -48,7 +48,14 @@ public class AlienInvasion {
     countries_m     = new LinkedList<>();
     die_m           = new TwentySidedDie();
     
-    writer_m = new BufferedWriter(new FileWriter(log_name));
+    // Open the log
+    try {
+      writer_m = new BufferedWriter(new FileWriter(log_name));
+    }
+    catch (IOException e)
+    {
+      System.out.println("File error!");
+    }
     
     // Create our countries
     for (String s : countries)
@@ -83,13 +90,13 @@ public class AlienInvasion {
     System.out.println("Invasion beginning with " + aliens_m.get() + " aliens");
     
     try {
-      writer_m.write(new String("Alien invasion beginning with ");
+      writer_m.write(new String("Alien invasion beginning with "));
       writer_m.flush();
-      writer_m.write(new String(String.valueOf(aliens_m.get()));
+      writer_m.write(new String(String.valueOf(aliens_m.get())));
       writer_m.flush();
       writer_m.write(new String(" aliens and "));
       writer_m.flush();
-      writer_m.write(new String(String.valueOf(countries_m.size()));
+      writer_m.write(new String(String.valueOf(countries_m.size())));
       writer_m.flush();
       writer_m.write(new String(" countries."));
       writer_m.flush();
@@ -110,9 +117,15 @@ public class AlienInvasion {
     // Get the first country
     Country next = GetNextCountry();
     
+    // Set a print count
+    int count = 0;
+    
     // Start a loop
     while (next != null)
     {
+      //! Increment count
+      count++;
+      
       //! Create Threads
       LinkedList<Thread> threads = new LinkedList<>();
       
@@ -129,6 +142,9 @@ public class AlienInvasion {
       
       //! Signal the Schedule start
       Country.BEGIN = true;
+      
+      //! Alert the user
+      System.out.println("Starting optimization");
       
       //! Wait for threads to complete
       while (queue_m.size() > 0)
@@ -151,21 +167,24 @@ public class AlienInvasion {
         System.out.println("Thread interrupted");
       } // end catch
       
+      //! Alert the user the attack is starting
+      System.out.println("Performing attack number " + count + " on " + next.GetName());
+      
       //! Roll the Dice
       int roll = die_m.Roll();
       
       //! Calculate Modifier
       int mod = CalculateModifier(next);
-      
+
       //! Log our next attack
       try {
-        writer_m.write(new String("Attacking ");
+        writer_m.write(new String("Attacking "));
         writer_m.flush();
         writer_m.write(new String(next.GetName()));
         writer_m.flush();
         writer_m.write(new String(" with a population size of "));
         writer_m.flush();
-        writer_m.write(new String(String.valueOf(GetPopulationSize(next)));
+        writer_m.write(new String(String.valueOf(GetPopulationSize(next))));
         writer_m.flush();
         writer_m.write(new String("."));
         writer_m.flush();
@@ -182,9 +201,6 @@ public class AlienInvasion {
       
       //! Execute the attack
       ExecuteAttack(next, roll, mod);
-      
-      //! Log the results of the attack
-      
       
       //! Check and see if the aliens were beaten
       if (aliens_m.get() < 1)
@@ -370,10 +386,42 @@ public class AlienInvasion {
       if (Defender.intValue() > 0)
       {
         country.Reduce_Supplies(defender_percentage);
+        
+        // log it
+        try {
+          writer_m.write(country.GetName().concat(new String(" lost ")));
+          writer_m.flush();
+          writer_m.write(String.valueOf(defender_percentage).concat(new String("% of resoures")));
+          writer_m.flush();
+          writer_m.newLine();
+        }
+        catch (IOException e)
+        {
+          System.out.println("File error!");
+        }
       }
       
+      // Now apply alien damage
       if (Attacker.intValue() > 0)
       {
+        try {
+          // log it
+          if (attacker_percentage > 0)
+          {
+            writer_m.write(new String("Aliens were reduced by ")
+              .concat(String.valueOf(aliens_m.get() * attacker_percentage)));
+          }
+          else
+            writer_m.write(new String("Aliens were not reduced"));
+          
+          writer_m.newLine();
+        }
+        catch (IOException e)
+        {
+          System.out.println("File error!");
+        }
+        
+        // Record the results
         aliens_m.set(aliens_m.get() - (long)(aliens_m.get() * attacker_percentage));
       }
     } // end if resource
@@ -383,12 +431,44 @@ public class AlienInvasion {
       if (Defender.intValue() > 0)
       {
         country.Reduce_Urban(defender_percentage);
+        
+        // log it
+        try {
+          writer_m.write(country.GetName().concat(new String(" lost ")));
+          writer_m.flush();
+          writer_m.write(String.valueOf(defender_percentage)
+            .concat(new String("% of people and houses")));
+          writer_m.flush();
+          writer_m.newLine();
+        }
+        catch (IOException e)
+        {
+          System.out.println("File error!");
+        }
       }
       
+      // Now apply alien damage
       if (Attacker.intValue() > 0)
       {
-        aliens_m.set(aliens_m.get() - (long)(aliens_m.get() * attacker_percentage));
-      }
+        // log it
+        try {
+          if (attacker_percentage > 0)
+          {
+            writer_m.write(new String("Aliens were reduced by ")
+              .concat(String.valueOf(aliens_m.get() * attacker_percentage)));
+          }
+          else
+            writer_m.write(new String("Aliens were not reduced"));
+          
+          writer_m.newLine();
+        
+          aliens_m.set(aliens_m.get() - (long)(aliens_m.get() * attacker_percentage));
+        } // end try
+        catch (IOException e)
+        {
+          System.out.println("File error!");
+        }
+      } // end if
     } // end else
   }
 
@@ -399,7 +479,7 @@ public class AlienInvasion {
     
     String output = new String("_AlienInvasion_output.txt");
     String file = new String("test4.csv");
-    String log = new String("alien_log.txt")
+    String log = new String("alien_log.txt");
     
     String Aerelon = new String("Aerelon");
     String Aquaria = new String("Aquaria");
