@@ -126,6 +126,9 @@ public class AlienInvasion {
       //! Increment count
       count++;
       
+      //! Sanitize the queue_m
+      queue_m.clear();
+      
       //! Create Threads
       LinkedList<Thread> threads = new LinkedList<>();
       
@@ -167,6 +170,9 @@ public class AlienInvasion {
         System.out.println("Thread interrupted");
       } // end catch
       
+      //! Stop the Countries from starting again
+      Country.BEGIN = false;
+      
       //! Alert the user the attack is starting
       System.out.println("Performing attack number " + count + " on " + next.GetName());
       
@@ -178,6 +184,7 @@ public class AlienInvasion {
 
       //! Log our next attack
       try {
+        writer_m.newLine();
         writer_m.write(new String("Attacking "));
         writer_m.flush();
         writer_m.write(new String(next.GetName()));
@@ -188,9 +195,16 @@ public class AlienInvasion {
         writer_m.flush();
         writer_m.write(new String("."));
         writer_m.flush();
+        writer_m.newLine();
         writer_m.write(new String("Roll: "));
         writer_m.flush();
-        writer_m.write(new String("Roll: "));
+        writer_m.write(String.valueOf(roll));
+        writer_m.flush();
+        writer_m.newLine();
+        writer_m.write(new String("Mod: "));
+        writer_m.flush();
+        writer_m.write(String.valueOf(mod));
+        writer_m.flush();
         writer_m.newLine();
         writer_m.flush();
       }
@@ -201,6 +215,9 @@ public class AlienInvasion {
       
       //! Execute the attack
       ExecuteAttack(next, roll, mod);
+      
+      //XXX
+      System.out.println("Aliens now have " + aliens_m);
       
       //! Check and see if the aliens were beaten
       if (aliens_m.get() < 1)
@@ -360,8 +377,12 @@ public class AlienInvasion {
     // Print size
     System.out.println("Size of the target world has " + size + " people");
     
-    // Get a random long between half the world size and 1.5 times its size
-    long[] longs = random_m.longs(1, (long)(size / 2), (long)(size * 1.5)).toArray();
+    // Get a random long between half the average country size and 1.5 times its size
+    long[] longs = random_m.longs(
+      1,
+      (long)((size / countries_m.size()) / 2),
+      (long)((size / countries_m.size()) * 1.5)
+    ).toArray();
     
     return longs[0];
   }
@@ -399,7 +420,7 @@ public class AlienInvasion {
         {
           System.out.println("File error!");
         }
-      }
+      } // end if
       
       // Now apply alien damage
       if (Attacker.intValue() > 0)
@@ -413,7 +434,9 @@ public class AlienInvasion {
           }
           else
             writer_m.write(new String("Aliens were not reduced"));
+            
           
+          writer_m.flush();          
           writer_m.newLine();
         }
         catch (IOException e)
@@ -423,7 +446,21 @@ public class AlienInvasion {
         
         // Record the results
         aliens_m.set(aliens_m.get() - (long)(aliens_m.get() * attacker_percentage));
-      }
+      } // end if
+      
+      // Check and see if there was no damage at all
+      if (Attacker.intValue() == 0 && Defender.intValue() == 0)
+      {
+        try {
+          writer_m.write(new String("No damage to either side occurred"));
+          writer_m.flush();
+          writer_m.newLine();
+        }
+        catch (IOException e)
+        {
+          System.out.println("File error!");
+        }
+      } // end if
     } // end if resource
     else // This is a population attack
     {
@@ -459,6 +496,8 @@ public class AlienInvasion {
           }
           else
             writer_m.write(new String("Aliens were not reduced"));
+            
+          writer_m.flush();
           
           writer_m.newLine();
         
@@ -469,6 +508,20 @@ public class AlienInvasion {
           System.out.println("File error!");
         }
       } // end if
+      
+      // Check and see if there was no damage at all
+      if (Attacker.intValue() == 0 && Defender.intValue() == 0)
+      {
+        try {
+          writer_m.write(new String("No damage to either side occurred"));
+          writer_m.flush();
+          writer_m.newLine();
+        }
+        catch (IOException e)
+        {
+          System.out.println("File error!");
+        }
+      }
     } // end else
   }
 
