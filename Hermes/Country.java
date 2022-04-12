@@ -538,7 +538,7 @@ public class Country implements Runnable, Scheduler {
       while (trade.GetSuccess() == false)
       {
         try {
-          Thread.sleep(100);
+          Thread.sleep(10);
 
           if (timer == 20)
           {
@@ -621,7 +621,7 @@ public class Country implements Runnable, Scheduler {
         while (found == false)
         {
           try {
-            Thread.sleep(100);
+            Thread.sleep(10);
 
             if (timer == 20)
             {

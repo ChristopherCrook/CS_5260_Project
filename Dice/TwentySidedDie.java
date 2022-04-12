@@ -112,8 +112,8 @@ public class TwentySidedDie {
       }
       else
       {
-        att.set(0); 
-        def.set(Math.abs(mod)); // should be a negative number
+        att.set(Math.abs(mod)); // should be a negative number
+        def.set(0); 
       }
       
       return;

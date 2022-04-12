@@ -27,7 +27,7 @@ public class AlienInvasion {
   private static TwentySidedDie die_m;
   
   //! Private constants
-  static final int SCHEDULES = 3;
+  static final int SCHEDULES = 2;
   static final int FRONTIER = 10;
   static final int BOUND = 10;
 
@@ -89,6 +89,7 @@ public class AlienInvasion {
     // Notify beginning
     System.out.println("Invasion beginning with " + aliens_m.get() + " aliens");
     
+    // Log the Invasion specifics
     try {
       writer_m.write(new String("Alien invasion beginning with "));
       writer_m.flush();
@@ -114,8 +115,8 @@ public class AlienInvasion {
     // Start the thread
     mt.start();
     
-    // Get the first country
-    Country next = GetNextCountry();
+    // Get the first country using a random seed
+    Country next = countries_m.get(random_m.nextInt(countries_m.size()));
     
     // Set a print count
     int count = 0;
@@ -129,92 +130,8 @@ public class AlienInvasion {
       //! Sanitize the queue_m
       queue_m.clear();
       
-      //! Create Threads
-      LinkedList<Thread> threads = new LinkedList<>();
-      
-      //! Add Countries to threads
-      for (Country c : countries_m)
-      {
-        Thread t = new Thread(c);
-        threads.add(t);
-      }
-      
-      //! Start threads
-      for (Thread tr : threads)
-        tr.start();
-      
-      //! Signal the Schedule start
-      Country.BEGIN = true;
-      
-      //! Alert the user
-      System.out.println("Starting optimization");
-      
-      //! Wait for threads to complete
-      while (queue_m.size() > 0)
-      {
-        try {
-          Thread.sleep(100);
-        }
-        catch (InterruptedException ie)
-        {
-          System.out.println("Thread interrupted");
-        }
-      } // end catch
-      
-      //! Shutdown threads
-      try {
-        for (Thread tr : threads)
-          tr.join();
-      }
-      catch (InterruptedException ie) {
-        System.out.println("Thread interrupted");
-      } // end catch
-      
-      //! Stop the Countries from starting again
-      Country.BEGIN = false;
-      
-      //! Alert the user the attack is starting
-      System.out.println("Performing attack number " + count + " on " + next.GetName());
-      
-      //! Roll the Dice
-      int roll = die_m.Roll();
-      
-      //! Calculate Modifier
-      int mod = CalculateModifier(next);
-
-      //! Log our next attack
-      try {
-        writer_m.newLine();
-        writer_m.write(new String("Attacking "));
-        writer_m.flush();
-        writer_m.write(new String(next.GetName()));
-        writer_m.flush();
-        writer_m.write(new String(" with a population size of "));
-        writer_m.flush();
-        writer_m.write(new String(String.valueOf(GetPopulationSize(next))));
-        writer_m.flush();
-        writer_m.write(new String("."));
-        writer_m.flush();
-        writer_m.newLine();
-        writer_m.write(new String("Roll: "));
-        writer_m.flush();
-        writer_m.write(String.valueOf(roll));
-        writer_m.flush();
-        writer_m.newLine();
-        writer_m.write(new String("Mod: "));
-        writer_m.flush();
-        writer_m.write(String.valueOf(mod));
-        writer_m.flush();
-        writer_m.newLine();
-        writer_m.flush();
-      }
-      catch (IOException e)
-      {
-        System.out.println("File error!");
-      }
-      
-      //! Execute the attack
-      ExecuteAttack(next, roll, mod);
+      // Run the Sequence
+      Run_Sequence(next, count);
       
       //XXX
       System.out.println("Aliens now have " + aliens_m);
@@ -246,6 +163,102 @@ public class AlienInvasion {
       System.out.println("Aliens have been defeated.");
     else
       System.out.println("Aliens are victorious.");
+  }
+  
+  //! Run Sequence of Optimization and Attack given a certain country
+  public static void Run_Sequence(Country current, int count)
+  {
+    //! Create Threads
+    LinkedList<Thread> threads = new LinkedList<>();
+      
+    //! Add Countries to threads
+    for (Country c : countries_m)
+    {
+      Thread t = new Thread(c);
+      threads.add(t);
+    }
+      
+    //! Start threads
+    for (Thread tr : threads)
+      tr.start();
+      
+    //! Signal the Schedule start
+    Country.BEGIN = true;
+      
+    //! Alert the user
+    System.out.println("Starting optimization");
+      
+    //! Wait for threads to complete using a timer
+    int timer = 0;
+    while (queue_m.size() > 0)
+    {
+      try {
+        if (timer > 49) // Wait up to 5000 milliseconds/ 5 seconds
+          break;
+        Thread.sleep(100);
+        
+        timer++;
+      }
+      catch (InterruptedException ie)
+      {
+        System.out.println("Thread interrupted");
+      }
+    } // end catch
+      
+    //! Shutdown threads
+    try {
+      for (Thread tr : threads)
+        tr.join();
+    }
+    catch (InterruptedException ie) {
+      System.out.println("Thread interrupted");
+    } // end catch
+      
+    //! Stop the Countries from starting again
+    Country.BEGIN = false;
+      
+    //! Alert the user the attack is starting
+    System.out.println("Performing attack number " + count + " on " + current.GetName());
+   
+    //! Roll the Dice
+    int roll = die_m.Roll();
+      
+    //! Calculate Modifier
+    int mod = CalculateModifier(current);
+
+    //! Log the attack
+    try {
+      writer_m.newLine();
+      writer_m.write(new String("Attacking "));
+      writer_m.flush();
+      writer_m.write(new String(current.GetName()));
+      writer_m.flush();
+      writer_m.write(new String(" with a population size of "));
+      writer_m.flush();
+      writer_m.write(new String(String.valueOf(GetPopulationSize(current))));
+      writer_m.flush();
+      writer_m.write(new String("."));
+      writer_m.flush();
+      writer_m.newLine();
+      writer_m.write(new String("Roll: "));
+      writer_m.flush();
+      writer_m.write(String.valueOf(roll));
+      writer_m.flush();
+      writer_m.newLine();
+      writer_m.write(new String("Mod: "));
+      writer_m.flush();
+      writer_m.write(String.valueOf(mod));
+      writer_m.flush();
+      writer_m.newLine();
+      writer_m.flush();
+    }
+    catch (IOException e)
+    {
+      System.out.println("File error!");
+    }
+      
+    //! Execute the attack
+    ExecuteAttack(current, roll, mod);   
   }
   
   //! Get Country population size
@@ -412,7 +425,7 @@ public class AlienInvasion {
         try {
           writer_m.write(country.GetName().concat(new String(" lost ")));
           writer_m.flush();
-          writer_m.write(String.valueOf(defender_percentage).concat(new String("% of resoures")));
+          writer_m.write(String.valueOf(Attacker.get()).concat(new String("% of resoures")));
           writer_m.flush();
           writer_m.newLine();
         }
@@ -430,7 +443,7 @@ public class AlienInvasion {
           if (attacker_percentage > 0)
           {
             writer_m.write(new String("Aliens were reduced by ")
-              .concat(String.valueOf(aliens_m.get() * attacker_percentage)));
+              .concat(String.valueOf((long)(aliens_m.get() * attacker_percentage))));
           }
           else
             writer_m.write(new String("Aliens were not reduced"));
@@ -473,7 +486,7 @@ public class AlienInvasion {
         try {
           writer_m.write(country.GetName().concat(new String(" lost ")));
           writer_m.flush();
-          writer_m.write(String.valueOf(defender_percentage)
+          writer_m.write(String.valueOf(Attacker.get())
             .concat(new String("% of people and houses")));
           writer_m.flush();
           writer_m.newLine();
@@ -531,7 +544,7 @@ public class AlienInvasion {
     ArrayList<String> names = new ArrayList<>();
     
     String output = new String("_AlienInvasion_output.txt");
-    String file = new String("test4.csv");
+    String file = new String("aliens.csv");
     String log = new String("alien_log.txt");
     
     String Aerelon = new String("Aerelon");
