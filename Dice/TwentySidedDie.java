@@ -31,7 +31,7 @@ public class TwentySidedDie {
   //! the attacker
   //! Integer def - a percentage reference for the amount of damage done to 
   //! the defending country
-  public void GetAttackScale(int roll, int mod, AtomicInteger att, AtomicInteger def)
+  public void GetAttackScale(int roll, int mod, AtomicInteger att, AtomicInteger def, boolean outnumber)
   {    
     if (roll == 1) // Attack went terrible potentially had losses
     {
@@ -45,9 +45,28 @@ public class TwentySidedDie {
         att.set(2); // 2% loss
         def.set(0);
       }
+      else if (mod > -12)
+      {
+        if (outnumber)
+          att.set(1);
+        else
+         att.set(3); // should be a negative number
+        def.set(0);
+      }
+      else if (mod > -16)
+      {
+        if (outnumber)
+          att.set(2);
+        else
+         att.set(5);
+        def.set(0);
+      }
       else
       {
-        att.set(2 * Math.abs(mod)); // should be a negative number
+        if (outnumber)
+          att.set(5);
+        else
+         att.set(2 * Math.abs(mod));
         def.set(0);
       }
       
@@ -60,14 +79,28 @@ public class TwentySidedDie {
         att.set(0); // No loss
         def.set(0);
       }
-      else if (mod < 10 && mod >= 0)
+      else if (mod < 10 && mod >= -12)
       {
-        att.set(1); // 1% loss
+        if (outnumber)
+          att.set(0);
+        else
+         att.set(1); // 1% loss
+        def.set(0);
+      }
+      else if (mod > -16)
+      {
+        if (outnumber)
+          att.set(1);
+        else
+         att.set(2);
         def.set(0);
       }
       else
       {
-        att.set(Math.abs(mod)); // should be a negative number
+        if (outnumber)
+          att.set(2);
+        else
+         att.set(Math.abs(mod));
         def.set(0);
       }
       
@@ -85,9 +118,26 @@ public class TwentySidedDie {
         att.set(1); // 1% damage
         def.set(0);
       }
+      
+      else if (mod > -12)
+      {
+        att.set(0);
+        def.set(0);
+      }
+      else if (mod > -16)
+      {
+        if (outnumber)
+          att.set(0);
+        else
+         att.set(1);
+        def.set(0);
+      }
       else
       {
-        att.set(Math.abs(mod)); // should be a negative number
+        if (outnumber)
+          att.set(1);
+        else
+         att.set(2);
         def.set(0);
       }
       
@@ -98,7 +148,7 @@ public class TwentySidedDie {
       if (mod >= 15)
       {
         att.set(0); 
-        def.set(5); // 5% effective
+        def.set(4); // 5% effective
       }
       else if (mod < 15 && mod >= 0)
       {
@@ -110,10 +160,18 @@ public class TwentySidedDie {
         att.set(0); // no loss
         def.set(0);
       }
+      else if (mod > -16)
+      {
+        att.set(0);
+        def.set(0);
+      }
       else
       {
-        att.set(Math.abs(mod)); // should be a negative number
-        def.set(0); 
+        if (outnumber)
+          att.set(0);
+        else
+         att.set(1);
+        def.set(0);
       }
       
       return;
@@ -128,16 +186,11 @@ public class TwentySidedDie {
       else if (mod < 10 && mod >= 0)
       {
         att.set(0);
-        def.set(2); // 2% effective
-      }
-      else if (mod < 0 && mod > -15)
-      {
-        att.set(0); // no loss
-        def.set(0);
+        def.set(3); // 2% effective
       }
       else
       {
-        att.set(Math.abs(mod)); // should be a negative number
+        att.set(0);
         def.set(0);
       }
       
@@ -153,16 +206,11 @@ public class TwentySidedDie {
       else if (mod < 15 && mod >= 0)
       {
         att.set(0);
-        def.set(3); // 3% effective
-      }
-      else if (mod < 0 && mod > -15)
-      {
-        att.set(0); // no damage
-        def.set(0);
+        def.set(4); // 3% effective
       }
       else
       {
-        att.set(3); // // 3% damage
+        att.set(0); // // 3% damage
         def.set(0); // 1% damage
       }
       
@@ -187,7 +235,11 @@ public class TwentySidedDie {
       }
       else
       {
-        att.set(2); // // 2% damage
+        
+        if (outnumber)
+          att.set(0);
+        else
+         att.set(2); // // 2% damage
         def.set(1); // 1% damage
       }
       
@@ -212,7 +264,10 @@ public class TwentySidedDie {
       }
       else
       {
-        att.set(2); // // 2% damage
+        if (outnumber)
+          att.set(0);
+        else
+         att.set(2); // // 2% damage
         def.set(1); // 1% damage
       }
       
@@ -237,7 +292,10 @@ public class TwentySidedDie {
       }
       else
       {
-        att.set(2); // // 2% damage
+        if (outnumber)
+          att.set(0);
+        else
+         att.set(2); // // 2% damage
         def.set(1); // 1% damage
       }
       
@@ -262,7 +320,10 @@ public class TwentySidedDie {
       }
       else
       {
-        att.set(1); // // 1% damage
+        if (outnumber)
+          att.set(0);
+        else
+         att.set(1); // // 1% damage
         def.set(1); // 1% damage
       }
       
@@ -380,35 +441,20 @@ public class TwentySidedDie {
         att.set(0);
         def.set(17); // 17% effective
       }
+      else if (mod < 0 && mod > -15)
+      {
+        att.set(0); 
+        def.set(1); // 2% damage
+      }
       else
       {
-        att.set(0); // no damage
-        def.set(0);
+        att.set(0); 
+        def.set(0); // No damage
       }
       
       return;
     }
     else if (roll == 17) //
-    {
-      if (mod >= 15)
-      {
-        att.set(0);
-        def.set(25); // 25% effective
-      }
-      else if (mod < 15 && mod >= 0)
-      {
-        att.set(0);
-        def.set(20); // 20% effective
-      }
-      else
-      {
-        att.set(0); // no damage
-        def.set(0);
-      }
-      
-      return;
-    }
-    else if (roll == 18) // Attack did much more significant damage than planned
     {
       if (mod >= 15)
       {
@@ -428,7 +474,32 @@ public class TwentySidedDie {
       else
       {
         att.set(0); 
-        def.set(0); // No damage
+        def.set(1); // No damage
+      }
+      
+      return;
+    }
+    else if (roll == 18) // Attack did much more significant damage than planned
+    {
+      if (mod >= 15)
+      {
+        att.set(0);
+        def.set(25); // 25% effective
+      }
+      else if (mod < 15 && mod >= 0)
+      {
+        att.set(0);
+        def.set(20); // 20% effective
+      }
+      else if (mod < 0 && mod > -15)
+      {
+        att.set(0); 
+        def.set(6); // 2% damage
+      }
+      else
+      {
+        att.set(0); 
+        def.set(3); // No damage
       }
       
       return;
@@ -448,12 +519,12 @@ public class TwentySidedDie {
       else if (mod < 0 && mod > -15)
       {
         att.set(0); 
-        def.set(3); // 3% damage
+        def.set(8); // 3% damage
       }
       else
       {
         att.set(0); 
-        def.set(0); // No damage
+        def.set(4); // No damage
       }
       
       return;
@@ -473,12 +544,12 @@ public class TwentySidedDie {
       else if (mod < 0 && mod > -15)
       {
         att.set(0); 
-        def.set(5); // 3% damage
+        def.set(7); // 3% damage
       }
       else
       {
         att.set(0); 
-        def.set(1); // No damage
+        def.set(3); // No damage
       }
       
       return;

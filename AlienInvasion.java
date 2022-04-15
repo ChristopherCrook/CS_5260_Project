@@ -143,8 +143,21 @@ public class AlienInvasion {
       //! If populate is 0, then get next Country
       if (GetPopulationSize(next) < 1)
       {
-        next = GetNextCountry();
-      }
+        // log it
+        try {
+          writer_m.write(next.GetName().concat(new String(" has been destroyed. ")));
+          writer_m.flush();
+          writer_m.newLine();
+        }
+        catch (IOException e)
+        {
+          System.out.println("File error!");
+        }
+        finally
+        {
+          next = GetNextCountry();
+        } // end finally
+      } // end if
     } // end while
     
     // shutdown the manager and the associated thread
@@ -279,6 +292,9 @@ public class AlienInvasion {
   //! return null
   public static Country GetNextCountry()
   {
+    if (countries_m.isEmpty())
+      return null;
+  
     // Loop through the countries
     for (Country c : countries_m)
     {
@@ -393,8 +409,8 @@ public class AlienInvasion {
     // Get a random long between half the average country size and 1.5 times its size
     long[] longs = random_m.longs(
       1,
-      (long)((size / countries_m.size()) / 2),
-      (long)((size / countries_m.size()) * 1.5)
+      (long)(size / 2),
+      (long)(size * 1.5)
     ).toArray();
     
     return longs[0];
@@ -406,26 +422,88 @@ public class AlienInvasion {
   {
     int type = random_m.nextInt(2);
     
+    Long thou = Long.valueOf(1000);
+    Long tenThou = Long.valueOf(10000);
+    
     AtomicInteger Attacker = new AtomicInteger(0);
     AtomicInteger Defender = new AtomicInteger(0);
     
-    die_m.GetAttackScale(roll, mod, Attacker, Defender);
+    // Check and see if we are beyond hope
+    if (GetPopulationSize(country) < 10 && thou.longValue() < aliens_m.get())
+    {
+      // No matter what we roll, they're going to die
+      country.Reduce_Urban(1);
+      return;
+    }
+    
+    // Check and see if the country is at their last stand
+    if (GetPopulationSize(country) < 100 && thou.longValue() < aliens_m.get())
+    {
+      if (roll > 2)
+      {
+        country.Reduce_Urban(1);
+        return;
+      }
+    }
+    
+    if (GetPopulationSize(country) <= 1000 && tenThou.longValue() < aliens_m.get())
+    {
+      if (roll > 15)
+      {
+        Attacker.set(0);
+        Defender.set(35);
+      }
+      else if (roll > 10)
+      {
+        Attacker.set(0);
+        Defender.set(25);
+      }
+      else if (roll > 5)
+      {
+        Attacker.set(1);
+        Defender.set(10);
+      }
+      else if (roll > 1)
+      {
+        Attacker.set(2);
+        Defender.set(5);
+      }
+      else
+      {
+        Attacker.set(2);
+        Defender.set(0);
+      }
+    }
+    else
+    {
+      boolean check = false;
+      
+      if ((long)(GetPopulationSize(country) * 10) < aliens_m.get())
+      {
+        check = true;
+      }
+      
+      die_m.GetAttackScale(roll, mod, Attacker, Defender, check);
+    }
+    
     
     float attacker_percentage = (float)(.01 * Attacker.get());
     float defender_percentage = (float)(.01 * Defender.get());
     
     if (type == 0) // This is a resource attack
     {
-      // First check the Defender damage
+      // No damage to aliens since this was a resource attack
+      // Check the Defender damage
       if (Defender.intValue() > 0)
       {
         country.Reduce_Supplies(defender_percentage);
+        country.Reduce_Urban((float)0.01);
         
         // log it
         try {
           writer_m.write(country.GetName().concat(new String(" lost ")));
           writer_m.flush();
-          writer_m.write(String.valueOf(Attacker.get()).concat(new String("% of resoures")));
+          writer_m.write(String.valueOf(Defender.get()).concat(new String("% of resoures")));
           writer_m.flush();
           writer_m.newLine();
         }
@@ -434,38 +512,10 @@ public class AlienInvasion {
           System.out.println("File error!");
         }
       } // end if
-      
-      // Now apply alien damage
-      if (Attacker.intValue() > 0)
+      else
       {
         try {
-          // log it
-          if (attacker_percentage > 0)
-          {
-            writer_m.write(new String("Aliens were reduced by ")
-              .concat(String.valueOf((long)(aliens_m.get() * attacker_percentage))));
-          }
-          else
-            writer_m.write(new String("Aliens were not reduced"));
-            
-          
-          writer_m.flush();          
-          writer_m.newLine();
-        }
-        catch (IOException e)
-        {
-          System.out.println("File error!");
-        }
-        
-        // Record the results
-        aliens_m.set(aliens_m.get() - (long)(aliens_m.get() * attacker_percentage));
-      } // end if
-      
-      // Check and see if there was no damage at all
-      if (Attacker.intValue() == 0 && Defender.intValue() == 0)
-      {
-        try {
-          writer_m.write(new String("No damage to either side occurred"));
+          writer_m.write(new String("No damage to resources"));
           writer_m.flush();
           writer_m.newLine();
         }
@@ -486,7 +536,7 @@ public class AlienInvasion {
         try {
           writer_m.write(country.GetName().concat(new String(" lost ")));
           writer_m.flush();
-          writer_m.write(String.valueOf(Attacker.get())
+          writer_m.write(String.valueOf(Defender.get())
             .concat(new String("% of people and houses")));
           writer_m.flush();
           writer_m.newLine();
@@ -505,7 +555,7 @@ public class AlienInvasion {
           if (attacker_percentage > 0)
           {
             writer_m.write(new String("Aliens were reduced by ")
-              .concat(String.valueOf(aliens_m.get() * attacker_percentage)));
+              .concat(String.valueOf((long)(aliens_m.get() * attacker_percentage))));
           }
           else
             writer_m.write(new String("Aliens were not reduced"));
