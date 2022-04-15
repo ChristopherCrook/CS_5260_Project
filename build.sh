@@ -29,5 +29,9 @@ javac Dice/TwentySidedDie.java
 javac AlienInvasion.java
 javac DieTest.java
 
+echo 'building civetweb app'
+gcc -Wall -I./civetweb -c ./civetweb/civetweb.c
+gcc -Wall -I./ -I./civetweb civetwebapp.c -o civetwebapp civetweb/civetweb.o
+
 echo 'building complete'
 ##javac -Xlint:deprecation TestRunner.java

@@ -24,7 +24,7 @@ public class DieTest {
       
       System.out.println("Roll is " + roll + "; mod is " + i);
       
-      t.GetAttackScale(roll, i, a, d);
+      t.GetAttackScale(roll, i, a, d, false);
       
       System.out.println("Attacker percentage is " + a.get() + "%");
       System.out.println("Defender percentage is " + d.get() + "%");
