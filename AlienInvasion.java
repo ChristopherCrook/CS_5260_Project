@@ -29,14 +29,16 @@ public class AlienInvasion {
   private static String currentCountry_m = new String("Current country under attack: ");
   private static String currentPop_m = new String("Current country population: ");
   private static String fifth_line_m = new String("Last attack: ");
-  private static String resAttack_m = new String("Resource attack; Aliens attacked ");
-  private static String popAttack_m = new String("Population attack; Aliens attacked ");
+  private static String resAttack_m = new String("Resource attack");
+  private static String popAttack_m = new String("Population attack");
+  private static String alienDamage_m = new String("Alien Damage: ");
+  private static String humanDamage_m = new String("Human Damage: ");
   private static String roll_m = new String("Roll: ");
   private static String modifier_m = new String("Modifier: ");
   private static String none_m = new String("None");
   private static String remaining_m = new String("Human countries destroyed: ");
-  private static String aliemDamage_m = new String("Alien Damage: ");
   private static String comma = new String(", ");
+  private static String percent_m = new String("%");
   private static String aWins_m = new String("Aliens Win!");
   private static String hWins_m = new String("Humans Win!");
   
@@ -491,6 +493,14 @@ public class AlienInvasion {
           size = size + GetPopulationSize(c);
       }
       
+      int left = 0;
+      
+      for (Country c : countries_m)
+      {
+        if (GetPopulationSize(c) > 0)
+          left++;
+      }
+      
       BufferedWriter writer;
       // log it
       try {
@@ -504,6 +514,22 @@ public class AlienInvasion {
         writer.write(third_line_m);
         writer.write(String.valueOf(countries_m.size()));
         writer.write(new String(","));
+        writer.write(fourth_line_m.concat(String.valueOf(countries_m.size() - left)));
+        writer.write(new String(","));
+        writer.write(currentCountry_m.concat(country.GetName()));
+        writer.write(new String(","));
+        writer.write(currentPop_m.concat(String.valueOf(GetPopulationSize(country))));
+        writer.write(new String(","));
+        writer.write(fifth_line_m.concat(resAttack_m));
+        writer.write(new String(","));
+        writer.write(humanDamage_m);
+        writer.write(String.valueOf(Defender.intValue()).concat(percent_m));
+        writer.write(new String(","));
+        writer.write(roll_m.concat(String.valueOf(roll)));
+        writer.write(new String(","));
+        writer.write(modifier_m.concat(String.valueOf(mod)));
+        writer.write(new String(","));
+        writer.write(remaining_m.concat(String.valueOf(left)));
         
         writer.flush();
         writer.newLine();
@@ -535,6 +561,14 @@ public class AlienInvasion {
           size = size + GetPopulationSize(c);
       }
       
+      int left = 0;
+      
+      for (Country c : countries_m)
+      {
+        if (GetPopulationSize(c) > 0)
+          left++;
+      }
+      
       BufferedWriter writer;
       // log it
       try {
@@ -548,6 +582,25 @@ public class AlienInvasion {
         writer.write(third_line_m);
         writer.write(String.valueOf(countries_m.size()));
         writer.write(new String(","));
+        writer.write(fourth_line_m.concat(String.valueOf(countries_m.size() - left)));
+        writer.write(new String(","));
+        writer.write(currentCountry_m.concat(country.GetName()));
+        writer.write(new String(","));
+        writer.write(currentPop_m.concat(String.valueOf(GetPopulationSize(country))));
+        writer.write(new String(","));
+        writer.write(fifth_line_m.concat(popAttack_m));
+        writer.write(new String(","));
+        writer.write(humanDamage_m);
+        writer.write(String.valueOf(Defender.intValue()).concat(percent_m));
+        writer.write(alienDamage_m);
+        writer.write(new String(" -- "));
+        writer.write(String.valueOf(Attacker.intValue()).concat(percent_m));
+        writer.write(new String(","));
+        writer.write(roll_m.concat(String.valueOf(roll)));
+        writer.write(new String(","));
+        writer.write(modifier_m.concat(String.valueOf(mod)));
+        writer.write(new String(","));
+        writer.write(remaining_m.concat(String.valueOf(left)));
         writer.flush();
         writer.newLine();
         

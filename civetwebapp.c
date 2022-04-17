@@ -71,10 +71,12 @@ static int handler(struct mg_connection *conn, void *ignored)
     pt = strtok(line, ",");
     while (pt != NULL)
     {
-      mg_printf(conn, "%s\n", line);
-      pt = strtok(line, ",");
+      mg_printf(conn, "<h1>%s</h1>\n", pt);
+      pt = strtok(NULL, ",");
     }
     //mg_printf(conn, "<p>%s</p>\n", line);
+    
+    fprintf(stdout, "eof reached\n");
   }
   mg_printf(conn, "</body>\n");
   mg_printf(conn, "</html>\n");
@@ -101,7 +103,7 @@ int main(int argc, char *argv[])
 
   /* ... Run the application ... */
 
-  system("/usr/bin/firefox http://localhost:8080/Arke --window-size=1000,800");
+  system("/usr/bin/firefox http://localhost:8080/AlienInvasion --window-size=1000,800");
 
   while (TRUE)
   {
