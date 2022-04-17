@@ -19,7 +19,26 @@ public class AlienInvasion {
   private static LinkedList<Country> countries_m;
   private static ArrayBlockingQueue<Entry> queue_m;
   private static Manager trade_manager_m;
-  private static BufferedWriter writer_m;
+  private String log_name_m;
+  private AtomicInteger destroyed_m;
+  
+  private String first_line_m = new String("Aliens population:  ");
+  private String second_line_m = new String("Human population: ");
+  private String third_line_m = new String("Number of Human countries: ");
+  private String fourth_line_m = new String("Human countries left: ");
+  private String currentCountry_m = new String("Current country under attack: ");
+  private String currentPop_m = new String("Current country population: ");
+  private String fifth_line_m = new String("Last attack: ");
+  private String resAttack_m = new String("Resource attack; Aliens attacked ");
+  private String popAttack_m = new String("Population attack; Aliens attacked ");
+  private String roll_m = new String("Roll: ");
+  private String modifier_m = new String("Modifier: ");
+  private String none_m = new String("None");
+  private String remaining_m = new String("Human countries destroyed: ");
+  private String aliemDamage_m = new String("Alien Damage: ");
+  private String comma = new String(", ");
+  private String aWins_m = new String("Aliens Win!");
+  private String hWins_m = new String("Humans Win!");
   
   private static Random random_m;
   private static AtomicLong aliens_m;
@@ -46,16 +65,10 @@ public class AlienInvasion {
     queue_m         = new ArrayBlockingQueue<>(100);
     trade_manager_m = new Manager();
     countries_m     = new LinkedList<>();
+    destroyed_m     = new AtomicInteger(countries.size());
     die_m           = new TwentySidedDie();
     
-    // Open the log
-    try {
-      writer_m = new BufferedWriter(new FileWriter(log_name));
-    }
-    catch (IOException e)
-    {
-      System.out.println("File error!");
-    }
+    log_name_m = new String(log_name);
     
     // Create our countries
     for (String s : countries)
@@ -89,26 +102,6 @@ public class AlienInvasion {
     // Notify beginning
     System.out.println("Invasion beginning with " + aliens_m.get() + " aliens");
     
-    // Log the Invasion specifics
-    try {
-      writer_m.write(new String("Alien invasion beginning with "));
-      writer_m.flush();
-      writer_m.write(new String(String.valueOf(aliens_m.get())));
-      writer_m.flush();
-      writer_m.write(new String(" aliens and "));
-      writer_m.flush();
-      writer_m.write(new String(String.valueOf(countries_m.size())));
-      writer_m.flush();
-      writer_m.write(new String(" countries."));
-      writer_m.flush();
-      writer_m.newLine();
-      writer_m.flush();
-    }
-    catch (IOException e)
-    {
-      System.out.println("File error!");
-    }
-    
     // Create Manager thread
     Thread mt = new Thread(trade_manager_m);
     
@@ -133,9 +126,6 @@ public class AlienInvasion {
       // Run the Sequence
       Run_Sequence(next, count);
       
-      //XXX
-      System.out.println("Aliens now have " + aliens_m);
-      
       //! Check and see if the aliens were beaten
       if (aliens_m.get() < 1)
         break;
@@ -143,20 +133,8 @@ public class AlienInvasion {
       //! If populate is 0, then get next Country
       if (GetPopulationSize(next) < 1)
       {
-        // log it
-        try {
-          writer_m.write(next.GetName().concat(new String(" has been destroyed. ")));
-          writer_m.flush();
-          writer_m.newLine();
-        }
-        catch (IOException e)
-        {
-          System.out.println("File error!");
-        }
-        finally
-        {
-          next = GetNextCountry();
-        } // end finally
+        int previous = destroyed_m.getAndDecrement();
+        next = GetNextCountry();
       } // end if
     } // end while
     
@@ -168,6 +146,43 @@ public class AlienInvasion {
     }
     catch (InterruptedException ie) {
       System.out.println("Thread interrupted");
+    }
+    
+    long size = 0;
+    if (countries_m.isEmpty() == true)
+    {
+      for (Country c : countries_m)
+        size = size + GetPopulationSize(c);
+    }
+    
+    try {
+      writer = new BufferedWriter(new FileWriter(log_name_m));
+      writer.write(first_line_m);
+      writer.write(String.valueOf(aliens_m.get());
+      writer.flush();
+      writer.newLine();
+      writer.write(second_line_m);
+      writer.write(String.valueOf(size));
+      writer.flush();
+      writer.newLine();
+      writer.write(third_line);
+      writer.write(String.valueOf(countries_m.size()));
+      writer.flush();
+      writer.newLine();
+      writer.write(fourth_line);
+      writer.write(destroyed_m.toString());
+      writer.flush();
+      writer.newLine();
+      if (aliens_m.get() > 0)
+        writer.write(aWins_m)
+      else
+        writer.write(hWins);
+      writer.flush();
+      writer.newLine();
+    }
+    catch (IOException e)
+    {
+      System.out.println("File error!");
     }
       
     // Let the user know we're done
