@@ -21,6 +21,7 @@ public class AlienInvasion {
   private static Manager trade_manager_m;
   private static String log_name_m;
   private static AtomicInteger destroyed_m;
+  private static AtomicInteger original_m;
   
   private static String first_line_m = new String("Aliens population: ");
   private static String second_line_m = new String("Human population: ");
@@ -68,6 +69,7 @@ public class AlienInvasion {
     trade_manager_m = new Manager();
     countries_m     = new LinkedList<>();
     destroyed_m     = new AtomicInteger(countries.size());
+    original_m      = new AtomicInteger(countries.size());
     die_m           = new TwentySidedDie();
     
     log_name_m = new String(log_name);
@@ -136,6 +138,7 @@ public class AlienInvasion {
       if (GetPopulationSize(next) < 1)
       {
         int previous = destroyed_m.getAndDecrement();
+        countries_m.remove(next);
         next = GetNextCountry();
       } // end if
     } // end while
@@ -167,7 +170,7 @@ public class AlienInvasion {
       writer.write(String.valueOf(size));
       writer.write(new String(","));
       writer.write(third_line_m);
-      writer.write(String.valueOf(countries_m.size()));
+      writer.write(String.valueOf(original_m.get()));
       writer.write(new String(","));
       writer.write(fourth_line_m);
       writer.write(destroyed_m.toString());
@@ -522,7 +525,7 @@ public class AlienInvasion {
         writer.write(String.valueOf(size));
         writer.write(new String(","));
         writer.write(third_line_m);
-        writer.write(String.valueOf(countries_m.size()));
+        writer.write(String.valueOf(original_m.get()));
         writer.write(new String(","));
         writer.write(fourth_line_m.concat(String.valueOf(left)));
         writer.write(new String(","));
@@ -590,7 +593,7 @@ public class AlienInvasion {
         writer.write(String.valueOf(size));
         writer.write(new String(","));
         writer.write(third_line_m);
-        writer.write(String.valueOf(countries_m.size()));
+        writer.write(String.valueOf(original_m.get()));
         writer.write(new String(","));
         writer.write(fourth_line_m.concat(String.valueOf(left)));
         writer.write(new String(","));

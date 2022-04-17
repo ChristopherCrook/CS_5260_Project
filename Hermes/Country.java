@@ -29,6 +29,8 @@ public class Country implements Runnable, Scheduler {
   //! Signal Flag to begin
   public static volatile boolean BEGIN = false;
   
+  public static volatile boolean LOGGING = false;
+  
   //! Variable for the Queue
   private ArrayBlockingQueue<Entry> queue_m;
 
@@ -173,14 +175,17 @@ public class Country implements Runnable, Scheduler {
     // Set the output file name and create the BufferedReader
     output_m = new String(output_schedule_filename.toCharArray());
     
-    try {
-      writer_m = new BufferedWriter(new FileWriter(output_m));
-      writer_m.write(new String(name_m).concat(new String(" file started")));
-      writer_m.flush();
-    }
-    catch (IOException e)
+    if (LOGGING)
     {
-      System.out.println("File error!");
+      try {
+        writer_m = new BufferedWriter(new FileWriter(output_m));
+        writer_m.write(new String(name_m).concat(new String(" file started")));
+        writer_m.flush();
+      }
+      catch (IOException e)
+      {
+        System.out.println("File error!");
+      }
     }
     
     // Set the scheduler variables
@@ -216,16 +221,19 @@ public class Country implements Runnable, Scheduler {
       // Set counter values
       AtomicInteger count = new AtomicInteger(0);
       
-      // Indicate the schedule in the log
-      try {
-        writer_m.newLine();
-        writer_m.newLine();
-        writer_m.write(new String("Schedule ").concat(String.valueOf(i + 1)));
-        writer_m.flush();
-      }
-      catch (IOException e)
+      if (LOGGING)
       {
-        System.out.println("File write error!");
+        // Indicate the schedule in the log
+        try {
+          writer_m.newLine();
+          writer_m.newLine();
+          writer_m.write(new String("Schedule ").concat(String.valueOf(i + 1)));
+          writer_m.flush();
+        }
+        catch (IOException e)
+        {
+          System.out.println("File write error!");
+        }
       }
       // Calculate Initial Status
       Status initial = new Status();
@@ -248,15 +256,18 @@ public class Country implements Runnable, Scheduler {
         exportStatus(key, value);
       });
       
-      // Get log ready for next entry
-      try {
-        writer_m.newLine();
-        writer_m.newLine();
-        writer_m.flush();
-      }
-      catch (IOException e)
+      if (LOGGING)
       {
-        System.out.println("File write error!");
+        // Get log ready for next entry
+        try {
+          writer_m.newLine();
+          writer_m.newLine();
+          writer_m.flush();
+        }
+        catch (IOException e)
+        {
+          System.out.println("File write error!");
+        }
       }
       // Calculate State
       check = this.CalculateStatus(this.status_m.get());
@@ -1184,18 +1195,21 @@ public class Country implements Runnable, Scheduler {
         state = state.concat(new String("false; "));
     }
     
-    try {
-      writer_m.newLine();
-      writer_m.newLine();
-      writer_m.write(state);
-      writer_m.flush();
-      writer_m.newLine();
-      writer_m.write(n.GetText());
-      writer_m.flush();
-    }
-    catch (IOException e)
+    if (LOGGING)
     {
-      System.out.println("File write error!");
+      try {
+        writer_m.newLine();
+        writer_m.newLine();
+        writer_m.write(state);
+        writer_m.flush();
+        writer_m.newLine();
+        writer_m.write(n.GetText());
+        writer_m.flush();
+      }
+      catch (IOException e)
+      {
+        System.out.println("File write error!");
+      }
     }
   }
   

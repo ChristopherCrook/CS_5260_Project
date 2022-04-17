@@ -24,6 +24,8 @@ public class Test1 {
     System.out.println("/--- Begin Test 1 ---/");
     Country Picon = new Country();
     Country Caprica = new Country();
+    
+    Country.LOGGING = true;
 
     String test = new String("test");
 

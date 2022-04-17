@@ -28,6 +28,7 @@ public class Test2 {
     Country Caprica = new Country();
     Country Gemenon = new Country();
 
+    Country.LOGGING = true;
     String test = new String("test");
 
     String file = new String("test2.csv");

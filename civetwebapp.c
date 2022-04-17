@@ -76,7 +76,6 @@ static int handler(struct mg_connection *conn, void *ignored)
     }
     //mg_printf(conn, "<p>%s</p>\n", line);
     
-    fprintf(stdout, "eof reached\n");
   }
   mg_printf(conn, "</body>\n");
   mg_printf(conn, "</html>\n");

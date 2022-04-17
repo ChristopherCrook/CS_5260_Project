@@ -63,6 +63,7 @@ public class Test5 {
     for (String s : names)
     {
       Country p = new Country();
+      Country.LOGGING = true;
       p.SetQueue(queue);
       p.schedule(
         s,

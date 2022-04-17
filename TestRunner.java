@@ -104,6 +104,7 @@ public class TestRunner {
   {
     System.out.println("/--- Begin Entry Test ---/");
     Country narnia = new Country();
+    Country.LOGGING = true;
     
     String test = new String("test");
     String file = new String("countries.csv");
@@ -203,6 +204,7 @@ public class TestRunner {
     Country Caprica = new Country();
     Country Gemenon = new Country();
     Country Aquaria = new Country();
+    Country.LOGGING = true;
     
     String test = new String("test");
     String file = new String("countries.csv");
