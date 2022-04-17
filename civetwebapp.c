@@ -63,11 +63,17 @@ static int handler(struct mg_connection *conn, void *ignored)
   }
 
   mg_printf(conn, "<h1></h1>\n");
+  
+  char *pt;
 
   while (fgets(line, sizeof(line), fp) != NULL)
   {
-    mg_printf(conn, "%s\n", line);
-
+    pt = strtok(line, ",");
+    while (pt != NULL)
+    {
+      mg_printf(conn, "%s\n", line);
+      pt = strtok(line, ",");
+    }
     //mg_printf(conn, "<p>%s</p>\n", line);
   }
   mg_printf(conn, "</body>\n");

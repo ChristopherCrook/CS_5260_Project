@@ -19,26 +19,26 @@ public class AlienInvasion {
   private static LinkedList<Country> countries_m;
   private static ArrayBlockingQueue<Entry> queue_m;
   private static Manager trade_manager_m;
-  private String log_name_m;
-  private AtomicInteger destroyed_m;
+  private static String log_name_m;
+  private static AtomicInteger destroyed_m;
   
-  private String first_line_m = new String("Aliens population:  ");
-  private String second_line_m = new String("Human population: ");
-  private String third_line_m = new String("Number of Human countries: ");
-  private String fourth_line_m = new String("Human countries left: ");
-  private String currentCountry_m = new String("Current country under attack: ");
-  private String currentPop_m = new String("Current country population: ");
-  private String fifth_line_m = new String("Last attack: ");
-  private String resAttack_m = new String("Resource attack; Aliens attacked ");
-  private String popAttack_m = new String("Population attack; Aliens attacked ");
-  private String roll_m = new String("Roll: ");
-  private String modifier_m = new String("Modifier: ");
-  private String none_m = new String("None");
-  private String remaining_m = new String("Human countries destroyed: ");
-  private String aliemDamage_m = new String("Alien Damage: ");
-  private String comma = new String(", ");
-  private String aWins_m = new String("Aliens Win!");
-  private String hWins_m = new String("Humans Win!");
+  private static String first_line_m = new String("Aliens population: ");
+  private static String second_line_m = new String("Human population: ");
+  private static String third_line_m = new String("Number of Human countries: ");
+  private static String fourth_line_m = new String("Human countries left: ");
+  private static String currentCountry_m = new String("Current country under attack: ");
+  private static String currentPop_m = new String("Current country population: ");
+  private static String fifth_line_m = new String("Last attack: ");
+  private static String resAttack_m = new String("Resource attack; Aliens attacked ");
+  private static String popAttack_m = new String("Population attack; Aliens attacked ");
+  private static String roll_m = new String("Roll: ");
+  private static String modifier_m = new String("Modifier: ");
+  private static String none_m = new String("None");
+  private static String remaining_m = new String("Human countries destroyed: ");
+  private static String aliemDamage_m = new String("Alien Damage: ");
+  private static String comma = new String(", ");
+  private static String aWins_m = new String("Aliens Win!");
+  private static String hWins_m = new String("Humans Win!");
   
   private static Random random_m;
   private static AtomicLong aliens_m;
@@ -149,36 +149,35 @@ public class AlienInvasion {
     }
     
     long size = 0;
-    if (countries_m.isEmpty() == true)
+    if (countries_m.isEmpty() == false)
     {
       for (Country c : countries_m)
         size = size + GetPopulationSize(c);
     }
+    BufferedWriter writer;
     
     try {
       writer = new BufferedWriter(new FileWriter(log_name_m));
       writer.write(first_line_m);
-      writer.write(String.valueOf(aliens_m.get());
-      writer.flush();
-      writer.newLine();
+      writer.write(String.valueOf(aliens_m.get()));
+      writer.write(new String(","));
       writer.write(second_line_m);
       writer.write(String.valueOf(size));
-      writer.flush();
-      writer.newLine();
-      writer.write(third_line);
+      writer.write(new String(","));
+      writer.write(third_line_m);
       writer.write(String.valueOf(countries_m.size()));
-      writer.flush();
-      writer.newLine();
-      writer.write(fourth_line);
+      writer.write(new String(","));
+      writer.write(fourth_line_m);
       writer.write(destroyed_m.toString());
-      writer.flush();
-      writer.newLine();
+      writer.write(new String(","));
       if (aliens_m.get() > 0)
-        writer.write(aWins_m)
+        writer.write(aWins_m);
       else
-        writer.write(hWins);
+        writer.write(hWins_m);
       writer.flush();
       writer.newLine();
+      
+      writer.close();
     }
     catch (IOException e)
     {
@@ -253,37 +252,6 @@ public class AlienInvasion {
       
     //! Calculate Modifier
     int mod = CalculateModifier(current);
-
-    //! Log the attack
-    try {
-      writer_m.newLine();
-      writer_m.write(new String("Attacking "));
-      writer_m.flush();
-      writer_m.write(new String(current.GetName()));
-      writer_m.flush();
-      writer_m.write(new String(" with a population size of "));
-      writer_m.flush();
-      writer_m.write(new String(String.valueOf(GetPopulationSize(current))));
-      writer_m.flush();
-      writer_m.write(new String("."));
-      writer_m.flush();
-      writer_m.newLine();
-      writer_m.write(new String("Roll: "));
-      writer_m.flush();
-      writer_m.write(String.valueOf(roll));
-      writer_m.flush();
-      writer_m.newLine();
-      writer_m.write(new String("Mod: "));
-      writer_m.flush();
-      writer_m.write(String.valueOf(mod));
-      writer_m.flush();
-      writer_m.newLine();
-      writer_m.flush();
-    }
-    catch (IOException e)
-    {
-      System.out.println("File error!");
-    }
       
     //! Execute the attack
     ExecuteAttack(current, roll, mod);   
@@ -505,6 +473,7 @@ public class AlienInvasion {
     float attacker_percentage = (float)(.01 * Attacker.get());
     float defender_percentage = (float)(.01 * Defender.get());
     
+    // Check what attack took place and wha' happened?
     if (type == 0) // This is a resource attack
     {
       // No damage to aliens since this was a resource attack
@@ -513,32 +482,37 @@ public class AlienInvasion {
       {
         country.Reduce_Supplies(defender_percentage);
         country.Reduce_Urban((float)0.01);
-        
-        // log it
-        try {
-          writer_m.write(country.GetName().concat(new String(" lost ")));
-          writer_m.flush();
-          writer_m.write(String.valueOf(Defender.get()).concat(new String("% of resoures")));
-          writer_m.flush();
-          writer_m.newLine();
-        }
-        catch (IOException e)
-        {
-          System.out.println("File error!");
-        }
       } // end if
-      else
+    
+      long size = 0;
+      if (countries_m.isEmpty() == false)
       {
-        try {
-          writer_m.write(new String("No damage to resources"));
-          writer_m.flush();
-          writer_m.newLine();
-        }
-        catch (IOException e)
-        {
-          System.out.println("File error!");
-        }
-      } // end if
+        for (Country c : countries_m)
+          size = size + GetPopulationSize(c);
+      }
+      
+      BufferedWriter writer;
+      // log it
+      try {
+        writer = new BufferedWriter(new FileWriter(log_name_m));
+        writer.write(first_line_m);
+        writer.write(String.valueOf(aliens_m.get()));
+        writer.write(new String(","));
+        writer.write(second_line_m);
+        writer.write(String.valueOf(size));
+        writer.write(new String(","));
+        writer.write(third_line_m);
+        writer.write(String.valueOf(countries_m.size()));
+        writer.write(new String(","));
+        
+        writer.flush();
+        writer.newLine();
+        writer.close();
+      }
+      catch (IOException e)
+      {
+        System.out.println("File error!");
+      }
     } // end if resource
     else // This is a population attack
     {
@@ -546,59 +520,42 @@ public class AlienInvasion {
       if (Defender.intValue() > 0)
       {
         country.Reduce_Urban(defender_percentage);
-        
-        // log it
-        try {
-          writer_m.write(country.GetName().concat(new String(" lost ")));
-          writer_m.flush();
-          writer_m.write(String.valueOf(Defender.get())
-            .concat(new String("% of people and houses")));
-          writer_m.flush();
-          writer_m.newLine();
-        }
-        catch (IOException e)
-        {
-          System.out.println("File error!");
-        }
       }
       
       // Now apply alien damage
       if (Attacker.intValue() > 0)
-      {
-        // log it
-        try {
-          if (attacker_percentage > 0)
-          {
-            writer_m.write(new String("Aliens were reduced by ")
-              .concat(String.valueOf((long)(aliens_m.get() * attacker_percentage))));
-          }
-          else
-            writer_m.write(new String("Aliens were not reduced"));
-            
-          writer_m.flush();
-          
-          writer_m.newLine();
-        
-          aliens_m.set(aliens_m.get() - (long)(aliens_m.get() * attacker_percentage));
-        } // end try
-        catch (IOException e)
-        {
-          System.out.println("File error!");
-        }
+      {        
+        aliens_m.set(aliens_m.get() - (long)(aliens_m.get() * attacker_percentage));
       } // end if
       
-      // Check and see if there was no damage at all
-      if (Attacker.intValue() == 0 && Defender.intValue() == 0)
+      long size = 0;
+      if (countries_m.isEmpty() == false)
       {
-        try {
-          writer_m.write(new String("No damage to either side occurred"));
-          writer_m.flush();
-          writer_m.newLine();
-        }
-        catch (IOException e)
-        {
-          System.out.println("File error!");
-        }
+        for (Country c : countries_m)
+          size = size + GetPopulationSize(c);
+      }
+      
+      BufferedWriter writer;
+      // log it
+      try {
+        writer = new BufferedWriter(new FileWriter(log_name_m));
+        writer.write(first_line_m);
+        writer.write(String.valueOf(aliens_m.get()));
+        writer.write(new String(","));
+        writer.write(second_line_m);
+        writer.write(String.valueOf(size));
+        writer.write(new String(","));
+        writer.write(third_line_m);
+        writer.write(String.valueOf(countries_m.size()));
+        writer.write(new String(","));
+        writer.flush();
+        writer.newLine();
+        
+        writer.close();
+      }
+      catch (IOException e)
+      {
+        System.out.println("File error!");
       }
     } // end else
   }
