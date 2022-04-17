@@ -46,7 +46,7 @@ static int handler(struct mg_connection *conn, void *ignored)
   mg_printf(conn, "var scrollingElement = (document.scrollingElement || document.body);\n");
   mg_printf(conn, "scrollingElement.scrollTop = scrollingElement.scrollHeight;\n");
   mg_printf(conn, "}\n");
-  mg_printf(conn, "setInterval('autoRefresh()', 5000);\n");
+  mg_printf(conn, "setInterval('autoRefresh()', 3000);\n");
   mg_printf(conn, "</script>\n");
   mg_printf(conn, "</head>\n");
   mg_printf(conn, "<body style=\"color:#00FF00; background-color:#000000\">\n");

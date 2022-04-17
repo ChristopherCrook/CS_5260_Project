@@ -30,6 +30,10 @@ javac AlienInvasion.java
 javac DieTest.java
 
 echo 'building civetweb app'
+cd civetweb-1.15
+make help
+make
+cd ..
 gcc -Wall -pthread -I./ -I./civetweb-1.15/include civetwebapp.c -o civetwebapp civetweb-1.15/out/src/civetweb.o -ldl 
 
 echo 'building complete'

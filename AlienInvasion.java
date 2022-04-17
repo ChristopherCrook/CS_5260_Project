@@ -222,7 +222,7 @@ public class AlienInvasion {
     while (queue_m.size() > 0)
     {
       try {
-        if (timer > 49) // Wait up to 5000 milliseconds/ 5 seconds
+        if (timer > 29) // Wait up to 3000 milliseconds/ 3 seconds
           break;
         Thread.sleep(100);
         
@@ -431,6 +431,16 @@ public class AlienInvasion {
       }
     }
     
+    // Check and see if the aliens are at their last stand
+    if (aliens_m.get() < 100 && GetPopulationSize(country) > thou.longValue())
+    {
+      if (roll <= 4)
+      {
+        aliens_m.set(0);
+        return;
+      }
+    }
+    
     if (GetPopulationSize(country) <= 1000 && tenThou.longValue() < aliens_m.get())
     {
       if (roll > 15)
@@ -438,19 +448,19 @@ public class AlienInvasion {
         Attacker.set(0);
         Defender.set(35);
       }
-      else if (roll > 10)
+      else if (roll <= 15 && roll > 10)
       {
         Attacker.set(0);
         Defender.set(25);
       }
-      else if (roll > 5)
+      else if (roll > 5 && roll <= 10)
       {
-        Attacker.set(1);
+        Attacker.set(0);
         Defender.set(10);
       }
-      else if (roll > 1)
+      else if (roll > 1 && roll <= 5)
       {
-        Attacker.set(2);
+        Attacker.set(1);
         Defender.set(5);
       }
       else
@@ -514,7 +524,7 @@ public class AlienInvasion {
         writer.write(third_line_m);
         writer.write(String.valueOf(countries_m.size()));
         writer.write(new String(","));
-        writer.write(fourth_line_m.concat(String.valueOf(countries_m.size() - left)));
+        writer.write(fourth_line_m.concat(String.valueOf(left)));
         writer.write(new String(","));
         writer.write(currentCountry_m.concat(country.GetName()));
         writer.write(new String(","));
@@ -529,7 +539,7 @@ public class AlienInvasion {
         writer.write(new String(","));
         writer.write(modifier_m.concat(String.valueOf(mod)));
         writer.write(new String(","));
-        writer.write(remaining_m.concat(String.valueOf(left)));
+        writer.write(remaining_m.concat(String.valueOf(countries_m.size() - left)));
         
         writer.flush();
         writer.newLine();
@@ -582,7 +592,7 @@ public class AlienInvasion {
         writer.write(third_line_m);
         writer.write(String.valueOf(countries_m.size()));
         writer.write(new String(","));
-        writer.write(fourth_line_m.concat(String.valueOf(countries_m.size() - left)));
+        writer.write(fourth_line_m.concat(String.valueOf(left)));
         writer.write(new String(","));
         writer.write(currentCountry_m.concat(country.GetName()));
         writer.write(new String(","));
@@ -592,15 +602,15 @@ public class AlienInvasion {
         writer.write(new String(","));
         writer.write(humanDamage_m);
         writer.write(String.valueOf(Defender.intValue()).concat(percent_m));
-        writer.write(alienDamage_m);
         writer.write(new String(" -- "));
+        writer.write(alienDamage_m);
         writer.write(String.valueOf(Attacker.intValue()).concat(percent_m));
         writer.write(new String(","));
         writer.write(roll_m.concat(String.valueOf(roll)));
         writer.write(new String(","));
         writer.write(modifier_m.concat(String.valueOf(mod)));
         writer.write(new String(","));
-        writer.write(remaining_m.concat(String.valueOf(left)));
+        writer.write(remaining_m.concat(String.valueOf(countries_m.size() - left)));
         writer.flush();
         writer.newLine();
         
