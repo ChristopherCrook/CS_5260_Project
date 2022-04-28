@@ -17,11 +17,6 @@
 const char directory[25] = ".";
 const char log_file[14] = "alien_log.txt";
 
-static char * colors[3] = {
-  "#FF0000",   // red
-  "#FFA500",   // orange
-  "#FFFFFF" }; // white
-
 static int handler(struct mg_connection *conn, void *ignored)
 {
   char file[14] = "alien_log.txt";
