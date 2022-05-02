@@ -101,6 +101,7 @@ public class AlienInvasion {
     trade_manager_m.SetQueue(queue_m);
   }
   
+  //! Method to start the Invasion logic
   public static void BeginInvasion()
   {
     // Notify beginning
@@ -173,7 +174,7 @@ public class AlienInvasion {
       writer.write(String.valueOf(original_m.get()));
       writer.write(new String(","));
       writer.write(fourth_line_m);
-      writer.write(destroyed_m.toString());
+      writer.write(countries_m.size());
       writer.write(new String(","));
       if (aliens_m.get() > 0)
         writer.write(aWins_m);
@@ -417,7 +418,7 @@ public class AlienInvasion {
     AtomicInteger Defender = new AtomicInteger(0);
     
     // Check and see if we are beyond hope
-    if (GetPopulationSize(country) < 10 && thou.longValue() < aliens_m.get())
+    if (GetPopulationSize(country) < 11 && GetPopulationSize(country) * 10 < aliens_m.get())
     {
       // No matter what we roll, they're going to die
       country.Reduce_Urban(1);
@@ -425,7 +426,7 @@ public class AlienInvasion {
     }
     
     // Check and see if the country is at their last stand
-    if (GetPopulationSize(country) < 100 && thou.longValue() < aliens_m.get())
+    if (GetPopulationSize(country) < 100 && GetPopulationSize(country) * 10 < aliens_m.get())
     {
       if (roll > 2)
       {
@@ -435,7 +436,7 @@ public class AlienInvasion {
     }
     
     // Check and see if the aliens are at their last stand
-    if (aliens_m.get() < 100 && GetPopulationSize(country) > thou.longValue())
+    if (aliens_m.get() < 100 && GetPopulationSize(country) > aliens_m.get() * 10)
     {
       if (roll <= 4)
       {
@@ -542,7 +543,7 @@ public class AlienInvasion {
         writer.write(new String(","));
         writer.write(modifier_m.concat(String.valueOf(mod)));
         writer.write(new String(","));
-        writer.write(remaining_m.concat(String.valueOf(countries_m.size() - left)));
+        writer.write(remaining_m.concat(String.valueOf(original_m.get() - countries_m.size())));
         
         writer.flush();
         writer.newLine();
@@ -613,7 +614,7 @@ public class AlienInvasion {
         writer.write(new String(","));
         writer.write(modifier_m.concat(String.valueOf(mod)));
         writer.write(new String(","));
-        writer.write(remaining_m.concat(String.valueOf(countries_m.size() - left)));
+        writer.write(remaining_m.concat(String.valueOf(original_m.get() - countries_m.size())));
         writer.flush();
         writer.newLine();
         
